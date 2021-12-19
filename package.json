@@ -1,0 +1,25 @@
+{
+  "name": "makao",
+  "version": "1.0.0",
+  "description": "Card game",
+  "main": "server.js",
+  "scripts": {
+    "devStart": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cmiband/Makao.git"
+  },
+  "author": "cmiband",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cmiband/Makao/issues"
+  },
+  "homepage": "https://github.com/cmiband/Makao#readme",
+  "dependencies": {
+    "express": "^4.17.2",
+    "nodemon": "^2.0.15",
+    "serve-favicon": "^2.5.0",
+    "socket.io": "^4.4.0"
+  }
+}
