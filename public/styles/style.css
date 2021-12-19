@@ -1,13 +1,13 @@
 body{
-    background-color: rgb(157, 230, 230);
+    background-color: rgb(186, 253, 253);
 }
 
 #root{
-    font-family: 'Times New Roman', Times, serif;
-    background-color: rgb(235, 235, 235);
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    background-color: rgb(241, 241, 241);
 
     margin: auto;
-    width: 50%;
+    width: 65%;
     height: 800px;
     border: 3px solid black;
     border-radius: 25px;
@@ -20,4 +20,16 @@ body{
 
     font-size: 50px;
     text-align: center;
+}
+
+#createLobby{
+    float: left;
+    margin-left: 80px;
+    padding: 10px;
+}
+
+#joinLobby{
+    float: right;
+    margin-right: 80px;
+    padding: 10px;
 }
