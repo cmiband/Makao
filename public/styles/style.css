@@ -1,0 +1,23 @@
+body{
+    background-color: rgb(157, 230, 230);
+}
+
+#root{
+    font-family: 'Times New Roman', Times, serif;
+    background-color: rgb(235, 235, 235);
+
+    margin: auto;
+    width: 50%;
+    height: 800px;
+    border: 3px solid black;
+    border-radius: 25px;
+    padding: 10px;
+}
+
+#title{
+    margin: auto;
+    padding: 10px;
+
+    font-size: 50px;
+    text-align: center;
+}

@@ -4,10 +4,11 @@ const port = 3000;
 const path = require('path');
 const favicon = require('serve-favicon');
 
-app.use(favicon(__dirname+'/graphics/favicon.ico'));
+app.use(favicon(__dirname+'/public/graphics/favicon.ico'));
+app.use(express.static(__dirname+'/public'));
 
 app.get('/', (req,res)=>{
-    res.sendFile(path.join(__dirname+'/views/index.html'))
+    res.sendFile(path.join(__dirname,'/public/views/index.html'))
 });
 
 app.listen(port, () => {
