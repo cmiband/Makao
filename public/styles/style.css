@@ -2,16 +2,40 @@ body{
     background-color: rgb(186, 253, 253);
 }
 
+input[type=text]{
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    display: block;
+    border: 1px solid black;
+    box-sizing: border-box;
+}
+
+button{
+    background-color: rgb(186, 253, 253);
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: 1px solid darkgray;
+    cursor: pointer;
+    width: 100%;
+}
+
+button:hover{
+    opacity: 0.8;
+}
+
 #root{
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     background-color: rgb(241, 241, 241);
 
+    position: absolute;
+    top: 15%;
+    left: 30%;
     margin: auto;
-    width: 65%;
-    height: 800px;
+    width: 40%;
+    height: 600px;
     border: 3px solid black;
     border-radius: 25px;
-    padding: 10px;
 }
 
 #title{
