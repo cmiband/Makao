@@ -19,4 +19,8 @@ server.listen(port, () => {
 
 io.on('connection', socket => {
     console.log(socket.id)
+
+    socket.on('create-lobby', (uname, lname) => {
+        console.log(uname + ' ' +lname)
+    });
 });

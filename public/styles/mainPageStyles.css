@@ -1,5 +1,5 @@
 body{
-    background-color: rgb(186, 253, 253);
+    background-image: url('/public/graphics/bg.jpg');
 }
 
 input[type=text]{
@@ -34,7 +34,7 @@ button:hover{
     margin: auto;
     width: 40%;
     height: 600px;
-    border: 3px solid black;
+    border: 1px solid gray;
     border-radius: 25px;
 }
 

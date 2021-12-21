@@ -6,8 +6,7 @@
         <meta name='description' content='Creating lobby for a game'>
         <title>App</title>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.0/socket.io.js"></script>
-        <link rel='stylesheet' type='text/css' href='/public/styles/style.css'/>
-        <script type='module' src='/client.js'></script>
+        <link rel='stylesheet' type='text/css' href='/public/styles/mainPageStyles.css'/>
     </head>
     <body>
         <div id='root'>
@@ -15,26 +14,29 @@
             <hr>
             <div id='createLobby'>
                 <h2>Stwórz lobby</h2>
-                <form class='creation'>
+                <form class='creation' onsubmit="return false">
                     <label for='nickname'>Nazwa użytkownika</label>
-                    <input type='text' name='nickname' required><br><br>
+                    <input type='text' name='nickname' id='nickForCreation'><br><br>
                     <label for='lobbyname'>Nazwa lobby</label>
-                    <input type='text' name='lobbyname' required><br><br>
+                    <input type='text' name='lobbyname' id='lobbyForCreation'><br><br>
                     
-                    <button type='submit'>Stwórz</button>
+                    <button type='submit' id='createLobbyButton'>Stwórz</button>
                 </form>
             </div>
             <div id='joinLobby'>
                 <h2>Dołącz do lobby</h2>
-                <form class='creation'>
+                <form class='creation' onsubmit="return false">
                     <label for='nickname'>Nazwa użytkownika</label>
-                    <input type='text' name='nickname' required><br><br>
+                    <input type='text' name='nickname' id='nickForJoining'><br><br>
                     <label for='lobbyname'>Nazwa lobby</label>
-                    <input type='text' name='lobbyname' required><br><br>
+                    <input type='text' name='lobbyname' id='lobbyForJoining'><br><br>
                     
-                    <button type='submit'>Dołącz</button>
+                    <button type='submit' id='joinLobbyButton'>Dołącz</button>
                 </form>
             </div>
+            <div id="newContent"></div>
         </div>
+
+        <script type='module' src='/client.js'></script>
     </body>
 </html>
