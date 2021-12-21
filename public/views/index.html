@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
         <meta name='viewport' content="width=device-width, initial-scale=1">
         <meta name='description' content='Creating lobby for a game'>
-        <title>App</title>
+        <title>Makao-gra karciana</title>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.0/socket.io.js"></script>
         <link rel='stylesheet' type='text/css' href='/public/styles/mainPageStyles.css'/>
     </head>
@@ -20,7 +20,7 @@
                     <label for='lobbyname'>Nazwa lobby</label>
                     <input type='text' name='lobbyname' id='lobbyForCreation'><br><br>
                     
-                    <button type='submit' id='createLobbyButton'>Stwórz</button>
+                    <a href='/public/views/lobby.html'><button type='submit' id='createLobbyButton'>Stwórz</button></a>
                 </form>
             </div>
             <div id='joinLobby'>
@@ -37,6 +37,6 @@
             <div id="newContent"></div>
         </div>
 
-        <script type='module' src='/client.js'></script>
+        <script type='module' src='/clientHomePage.js'></script>
     </body>
 </html>

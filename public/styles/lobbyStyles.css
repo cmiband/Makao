@@ -1,0 +1,60 @@
+body{
+    background-image: url('/public/graphics/bg.jpg');
+}
+
+#root{
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    background-color: rgb(241, 241, 241);
+
+    position: relative;
+    margin: auto;
+    width: 60%;
+    height: 800px;
+    border: 1px solid gray;
+    border-radius: 25px;
+
+    padding: 10px;
+}
+
+#title{
+    text-align: center;
+    font-size: 60px;
+}
+
+button{
+    background-color: rgb(186, 253, 253);
+    padding: 14px 20px;
+    border: 1px solid gray;
+    margin: 8px 0;
+    cursor:pointer;
+    width: 30%;
+}
+
+button:hover{
+    opacity: 0.8;
+}
+
+#leaveButton{
+    float: left;
+}
+
+#startButton{
+    float: right;
+}
+
+#usersInLobby{
+    background-color: white;
+    
+    position: absolute;
+    bottom: 100px;
+    left: 25%;
+
+    width: 50%;
+    height: 400px;
+    border: 2px solid gray;
+}
+
+.specificUserInLobby{
+    border: 2px solid lightgray;
+    font-size: 60px;
+}
