@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name='viewport' content="width=device-width, initial-scale=1">
+        <title>Lobby</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.0/socket.io.js"></script>
+        <link rel='stylesheet' type='text/css' href='/public/styles/lobbyStyles.css'/>
+    </head>
+    <body>
+        <div id='root'>
+            <h1 id='title'>Lobby</h1>
+            <hr>
+            
+            <div id='top'>
+                <button type='submit' id='leaveButton'>Wyjście</button>
+            </div>
+
+            <div id='usersInLobby'>
+                
+            </div>
+        </div>
+
+        <script type='module' src='/clientLobbyUser.js'></script>
+    </body>
+</html>

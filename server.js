@@ -1,5 +1,5 @@
 const express = require('express');
-const { copyFileSync } = require('fs');
+const { appendFileSync } = require('fs');
 const app = express();
 const server = require('http').createServer(app);
 const port = 3000;
@@ -35,6 +35,10 @@ io.on('connection', socket => {
     ownerJoined(socket);
 
     checkIfUserExistsAndDisconnect(socket);
+
+    joiningLobbyAttempt(socket);
+
+    userJoiningLobby(socket);
 });
 
 
@@ -50,14 +54,14 @@ const createLobby = (socket) =>{
         userName = uname;
         lobbyName = lname;
         console.log(`Player username: ${uname}, Lobby title: ${lname}`);
-        addLobby(uname,lname);
+        addLobby(lname,uname);
 
         console.log(availableLobbys);
     });
 }
 
-const addLobby = (uname, lname) => {
-    availableLobbys.set(uname, lname);
+const addLobby = (lname, uname) => {
+    availableLobbys.set(lname, uname);
 }
 
 const addUser = (id,name) => {
@@ -73,6 +77,8 @@ const onDisconnect = (socket) => {
 const ownerJoined = (socket) => {
     socket.on('ownerJoinedLobby', (name)=>{
         addUser(socket.id, name);
+        
+        socket.join(getKeyByValue(availableLobbys, name));
 
         console.log(`Owner with name ${name} and id ${socket.id} joined lobby`);
 
@@ -80,10 +86,57 @@ const ownerJoined = (socket) => {
     });
 }
 
+const joiningLobbyAttempt = (socket) => {
+    socket.on('join-lobby-attempt', (uname,lname)=>{
+        console.log(`${uname} tries to join lobby named ${lname}`)
+        
+        if(availableLobbys.get(lname) !== undefined){
+            socket.emit('lobby-found');
+            addUser(socket.id, uname);
+        }
+    });
+}
+
 const checkIfUserExistsAndDisconnect = (socket) => {
     socket.on('owner-leaves-lobby', () => {
+        let ownerName = getKeyByValue(availableLobbys, socket.id);
+        let lobbyName = getKeyByValue(availableLobbys, ownerName);
+        availableLobbys.delete(lobbyName);
         users.delete(socket.id);
 
         console.log(`user with id ${socket.id} removed from users map`);
     })
+}
+
+const userJoiningLobby = (socket) => {
+    socket.on('user-joined-lobby', () => {
+        console.log('trying to send informations back to the user...');
+        let lastNickInMap = getLastValueInMap(users);
+        if(lastNickInMap === false){
+            return false;
+        }
+        users.delete(getKeyByValue(lastNickInMap));
+        addUser(socket.id, lastNickInMap);
+
+        socket.emit('user-info-receiver', lastNickInMap);
+    });
+}
+
+const getKeyByValue = (map, searched) => {
+    return [...map].find(([key,value]) => value == searched)[0];
+}
+
+const getLastItemInMap = (map) => [...map][map.size-1];
+const getLastKeyInMap = (map) => [...map][map.size-1][0];
+const getLastValueInMap = (map) => {
+    let tab = [...map][map.size-1];
+    if(tab === undefined){
+        return false;
+    }
+    let val = tab[1];
+    if(val == undefined){
+        return false;
+    }
+
+    return val;
 }
