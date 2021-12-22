@@ -1,5 +1,5 @@
 const express = require('express');
-const { add } = require('nodemon/lib/rules');
+const { copyFileSync } = require('fs');
 const app = express();
 const server = require('http').createServer(app);
 const port = 3000;
@@ -24,7 +24,7 @@ server.listen(port, () => {
 });
 
 io.on('connection', socket => {
-    console.log("User connected with id: "+socket.id)
+    console.log("User connected with id: "+socket.id);
 
     createLobby(socket);
 
@@ -33,6 +33,8 @@ io.on('connection', socket => {
     onDisconnect(socket);
 
     ownerJoined(socket);
+
+    checkIfUserExistsAndDisconnect(socket);
 });
 
 
@@ -49,10 +51,9 @@ const createLobby = (socket) =>{
         lobbyName = lname;
         console.log(`Player username: ${uname}, Lobby title: ${lname}`);
         addLobby(uname,lname);
-    });
 
-    console.log(availableLobbys);
-    console.log(users);
+        console.log(availableLobbys);
+    });
 }
 
 const addLobby = (uname, lname) => {
@@ -71,8 +72,18 @@ const onDisconnect = (socket) => {
 
 const ownerJoined = (socket) => {
     socket.on('ownerJoinedLobby', (name)=>{
-        addUser(name, socket.id);
+        addUser(socket.id, name);
 
-        console.log(`Owner with name ${name} and id ${socket.id}`);
+        console.log(`Owner with name ${name} and id ${socket.id} joined lobby`);
+
+        console.log(users);
+    });
+}
+
+const checkIfUserExistsAndDisconnect = (socket) => {
+    socket.on('owner-leaves-lobby', () => {
+        users.delete(socket.id);
+
+        console.log(`user with id ${socket.id} removed from users map`);
     })
 }

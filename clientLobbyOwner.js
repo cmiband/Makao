@@ -11,10 +11,10 @@ leaveButton.addEventListener('click', leaveLobby);
 
 socket.emit('lobbyPageLoaded');
 
-function leaveLobby(){
-    document.location.href = '/public/views/index.html';
+async function leaveLobby(){
+    await socket.emit('owner-leaves-lobby');
 
-    socket.disconnect();
+    document.location.href = '/public/views/index.html';
 }
 
 function addPlayerToList(playerName){
@@ -33,4 +33,3 @@ socket.on('sendInformationToLobby', (uname,lname) => {
 
     socket.emit('ownerJoinedLobby', uname,socket.id);
 });
-
