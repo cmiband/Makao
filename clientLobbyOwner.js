@@ -12,7 +12,7 @@ leaveButton.addEventListener('click', leaveLobby);
 socket.emit('lobbyPageLoaded');
 
 async function leaveLobby(){
-    await socket.emit('owner-leaves-lobby');
+    await socket.emit('owner-leaves-lobby', userName,lobbyName);
 
     document.location.href = '/public/views/index.html';
 }
