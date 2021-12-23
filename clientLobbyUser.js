@@ -8,7 +8,11 @@ let lobbyName;
 
 socket.emit('user-joined-lobby');
 
-socket.on('user-info-receiver', (nick) => {
+socket.on('user-info-receiver', (nick,lname,owname) => {
     userName = nick;
+    partyOwnerName = owname;
+    lobbyName=lname;
+
+    title.innerHTML = `${lobbyName}, lobby gracza ${partyOwnerName}`;
 });
 

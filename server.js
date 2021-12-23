@@ -35,8 +35,6 @@ io.on('connection', socket => {
 
     ownerJoined(socket);
 
-    checkIfUserExistsAndDisconnect(socket);
-
     joiningLobbyAttempt(socket);
 
     userJoiningLobby(socket);
@@ -77,7 +75,21 @@ const addUserToSpecificLobby = (lname, uname) => {
 
 const onDisconnect = (socket) => {
     socket.on('disconnect', () => {
-        console.log(`user with id: ${socket.id} disconnected`);
+        let uname = users.get(socket.id);
+        if(uname === undefined){
+            return;
+        }
+        users.delete(socket.id);
+        let lname = getKeyByValue(availableLobbys, uname);
+        if(lname === undefined){
+            return;
+        }
+        availableLobbys.delete(lname);
+        lobbysWithUsers.delete(lname);
+
+        console.log(users);
+        console.log(availableLobbys);
+        console.log(lobbysWithUsers);
     });
 }
 
@@ -107,14 +119,6 @@ const joiningLobbyAttempt = (socket) => {
     console.log(lobbysWithUsers);
 }
 
-const checkIfUserExistsAndDisconnect = (socket) => {
-    socket.on('owner-leaves-lobby', (uname,lname) => {
-        users.delete(socket.id);
-        availableLobbys.delete(lname);
-        lobbysWithUsers.delete(lname);
-    })
-}
-
 const userJoiningLobby = (socket) => {
     socket.on('user-joined-lobby', () => {
         console.log('trying to send informations back to the user...');
@@ -123,8 +127,11 @@ const userJoiningLobby = (socket) => {
             return;
         }
         swapIds(socket, lastNickInMap);
+        let lobbyName = getKeyByValueInArray(lobbysWithUsers, lastNickInMap);
+        let lobbyOwnerName = availableLobbys.get(lobbyName);
 
-        socket.emit('user-info-receiver', lastNickInMap);
+
+        socket.emit('user-info-receiver', lastNickInMap, lobbyName, lobbyOwnerName);
     });
 }
 
@@ -141,6 +148,16 @@ const getKeyByValue = (map, searched) => {
     for(const [key,value] of map.entries()){
         if(value===searched){
             return key;
+        }
+    }
+}
+
+const getKeyByValueInArray = (map, searched) => {
+    for(const [key, values] of map.entries()){
+        for(const value of values){
+            if(value === searched){
+                return key;
+            }
         }
     }
 }
