@@ -31,3 +31,7 @@ socket.on('sendInformationToLobby', (uname,lname) => {
 
     socket.emit('ownerJoinedLobby', uname,socket.id);
 });
+
+socket.on('room-test', () => {
+    alert('room works');
+});

@@ -38,6 +38,8 @@ io.on('connection', socket => {
     joiningLobbyAttempt(socket);
 
     userJoiningLobby(socket);
+
+    addToListRequests(socket);
 });
 
 
@@ -130,8 +132,15 @@ const userJoiningLobby = (socket) => {
         let lobbyName = getKeyByValueInArray(lobbysWithUsers, lastNickInMap);
         let lobbyOwnerName = availableLobbys.get(lobbyName);
 
+        socket.join(lobbyName);
 
         socket.emit('user-info-receiver', lastNickInMap, lobbyName, lobbyOwnerName);
+    });
+}
+
+const addToListRequests = (socket) => {
+    socket.on('add-to-list-attempt', (uname,lname) => {
+        io.to(lname).emit('room-test');
     });
 }
 

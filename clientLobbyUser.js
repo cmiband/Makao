@@ -14,5 +14,9 @@ socket.on('user-info-receiver', (nick,lname,owname) => {
     lobbyName=lname;
 
     title.innerHTML = `${lobbyName}, lobby gracza ${partyOwnerName}`;
+    socket.emit('add-to-list-attempt', userName, lobbyName);
 });
 
+socket.on('room-test', () => {
+    alert('room works');
+});
