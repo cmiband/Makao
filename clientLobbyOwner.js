@@ -6,12 +6,14 @@ const usersInLobby = document.getElementById('usersInLobby');
 
 let userName;
 let lobbyName;
+let users = [];
 
 leaveButton.addEventListener('click', leaveLobby);
 
 socket.emit('lobbyPageLoaded');
 
-async function leaveLobby(){
+function leaveLobby(){
+    socket.emit('owner-leaves', userName, lobbyName);
     document.location.href = '/public/views/index.html';
 }
 
@@ -28,10 +30,15 @@ socket.on('sendInformationToLobby', (uname,lname) => {
     title.innerHTML = `${lobbyName}, lobby gracza ${userName}`;
 
     addPlayerToList(uname);
+    users.push(uname);
 
     socket.emit('ownerJoinedLobby', uname,socket.id);
 });
 
-socket.on('room-test', () => {
+socket.on('add-to-list', (uname) => {
+    if(!users.includes(uname)){
+        addPlayerToList(uname);
+        users.push(uname);
+    }
     alert('room works');
 });

@@ -36,6 +36,8 @@ io.on('connection', socket => {
 
     ownerJoined(socket);
 
+    ownerLeft(socket);
+
     joiningLobbyAttempt(socket);
 
     userJoiningLobby(socket);
@@ -108,6 +110,14 @@ const ownerJoined = (socket) => {
     });
 }
 
+const ownerLeft = (socket) => {
+    socket.on('owner-leaves', (uname, lname) => {
+        io.to(lname).emit('owner-left-kick-all');
+        availableLobbys.delete(lname);
+        lobbysWithUsers.delete(lname);
+    });
+}
+
 const joiningLobbyAttempt = (socket) => {
     socket.on('join-lobby-attempt', (uname,lname)=>{
         console.log(`${uname} tries to join lobby named ${lname}`)
@@ -129,7 +139,7 @@ const userJoiningLobby = (socket) => {
         if(nick === undefined){
             return;
         }
-        users.set(socket.id, nick);
+        addUser(socket.id, nick);
         let lobbyName = getKeyByValueInArray(lobbysWithUsers, nick);
         let lobbyOwnerName = availableLobbys.get(lobbyName);
 
@@ -141,7 +151,7 @@ const userJoiningLobby = (socket) => {
 
 const addToListRequests = (socket) => {
     socket.on('add-to-list-attempt', (uname,lname) => {
-        io.to(lname).emit('room-test');
+        io.to(lname).emit('add-to-list', uname);
     });
 }
 
