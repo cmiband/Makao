@@ -10,6 +10,7 @@ const favicon = require('serve-favicon');
 const availableLobbys = new Map();
 const lobbysWithUsers = new Map();
 const users = new Map();
+let usersWaitingToJoin = [];
 let userName;
 let lobbyName;
 
@@ -113,8 +114,8 @@ const joiningLobbyAttempt = (socket) => {
         
         if(availableLobbys.get(lname) !== undefined){
             socket.emit('lobby-found');
-            addUser(socket.id, uname);
-            addUserToSpecificLobby(lname, uname);
+            usersWaitingToJoin.push(uname);
+            addUserToSpecificLobby(lname,uname);
         }
     });
 
@@ -124,17 +125,17 @@ const joiningLobbyAttempt = (socket) => {
 const userJoiningLobby = (socket) => {
     socket.on('user-joined-lobby', () => {
         console.log('trying to send informations back to the user...');
-        let lastNickInMap = getLastValueInMap(users);
-        if(lastNickInMap === false){
+        let nick = usersWaitingToJoin.pop();
+        if(nick === undefined){
             return;
         }
-        swapIds(socket, lastNickInMap);
-        let lobbyName = getKeyByValueInArray(lobbysWithUsers, lastNickInMap);
+        users.set(socket.id, nick);
+        let lobbyName = getKeyByValueInArray(lobbysWithUsers, nick);
         let lobbyOwnerName = availableLobbys.get(lobbyName);
 
         socket.join(lobbyName);
 
-        socket.emit('user-info-receiver', lastNickInMap, lobbyName, lobbyOwnerName);
+        socket.emit('user-info-receiver', nick, lobbyName, lobbyOwnerName);
     });
 }
 

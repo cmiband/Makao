@@ -58,3 +58,9 @@ button:hover{
     border: 2px solid lightgray;
     font-size: 60px;
 }
+
+#yourNick{
+    position: absolute;
+
+    bottom: 25px;
+}
