@@ -40,5 +40,4 @@ socket.on('add-to-list', (uname) => {
         addPlayerToList(uname);
         users.push(uname);
     }
-    alert('room works');
 });

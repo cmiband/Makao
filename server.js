@@ -155,15 +155,6 @@ const addToListRequests = (socket) => {
     });
 }
 
-const swapIds = (socket, uname) => {
-    console.log(users);
-    users.delete(getKeyByValue(users, uname));
-    users.set(socket.id, uname);
-    console.log('swapping....');
-
-    console.log(users);
-}
-
 const getKeyByValue = (map, searched) => {
     for(const [key,value] of map.entries()){
         if(value===searched){

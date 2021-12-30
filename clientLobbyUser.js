@@ -39,17 +39,17 @@ socket.on('user-info-receiver', (nick,lname,owname) => {
     addPlayerToList(userName);
     users.push(userName);
 
-    title.innerHTML = `${lobbyName}, lobby gracza ${partyOwnerName}`;
-    yourNick.innerHTML = `Twój nick: ${userName}`;
+    title.textContent = `${lobbyName}, lobby gracza ${partyOwnerName}`;
+    yourNick.textContent = `Twój nick: ${userName}`;
     socket.emit('add-to-list-attempt', userName, lobbyName);
 });
 
 socket.on('add-to-list', (uname) => {
-    if(!users.has(uname)){
+    alert('request received with username : ' +uname);
+    if(!users.includes(uname)){
         addPlayerToList(uname);
         users.push(uname);
     }
-    alert('room works');
 });
 
 socket.on('owner-left-kick-all', () => {
