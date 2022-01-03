@@ -13,7 +13,7 @@ leaveButton.addEventListener('click', leaveLobby);
 socket.emit('lobbyPageLoaded');
 
 function leaveLobby(){
-    socket.emit('owner-leaves', userName, lobbyName);
+    socket.emit('owner-leaves', lobbyName);
     document.location.href = '/public/views/index.html';
 }
 
@@ -35,9 +35,11 @@ socket.on('sendInformationToLobby', (uname,lname) => {
     socket.emit('ownerJoinedLobby', uname,socket.id);
 });
 
-socket.on('add-to-list', (uname) => {
+socket.on('add-to-list', (uname, usersTempArray) => {
     if(!users.includes(uname)){
         addPlayerToList(uname);
         users.push(uname);
     }
+    let temp = usersTempArray;
+    alert(temp[users.length-1]);
 });

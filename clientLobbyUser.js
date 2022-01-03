@@ -31,8 +31,6 @@ socket.on('user-info-receiver', (nick,lname,owname) => {
     partyOwnerName = owname;
     lobbyName=lname;
 
-    alert(userName + " " +partyOwnerName+ " " +lobbyName);
-
     addPlayerToList(partyOwnerName);
     users.push(partyOwnerName);
 
@@ -44,12 +42,13 @@ socket.on('user-info-receiver', (nick,lname,owname) => {
     socket.emit('add-to-list-attempt', userName, lobbyName);
 });
 
-socket.on('add-to-list', (uname) => {
-    alert('request received with username : ' +uname);
+socket.on('add-to-list', (uname, usersTempArray) => {
     if(!users.includes(uname)){
         addPlayerToList(uname);
         users.push(uname);
     }
+    let temp = usersTempArray;
+    alert(temp[users.length-1]);
 });
 
 socket.on('owner-left-kick-all', () => {

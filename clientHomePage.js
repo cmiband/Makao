@@ -21,6 +21,10 @@ async function createLobby(){
     let uname = document.getElementById('nickForCreation').value;
     let lname = document.getElementById('lobbyForCreation').value;
 
+    if(uname === '' || lname === ''){
+        return;
+    }
+
     await socket.emit('create-lobby', uname,lname);
     
     document.location.href = '/public/views/lobby.html';

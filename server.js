@@ -88,10 +88,19 @@ const onDisconnect = (socket) => {
         let lname = getKeyByValue(availableLobbys, uname);
         if(lname === undefined){
             return;
+        }else{
+            availableLobbys.delete(lname);
+            lobbysWithUsers.delete(lname);
         }
-        availableLobbys.delete(lname);
-        lobbysWithUsers.delete(lname);
-
+        
+        let lnameByUser = getKeyByValueInArray(lobbysWithUsers, uname);
+        if(lnameByUser === undefined){
+            return;
+        }else{
+            let usersInLobby = lobbysWithUsers.get(lnameByUser);
+            
+        }
+        
         console.log(users);
         console.log(availableLobbys);
         console.log(lobbysWithUsers);
@@ -111,7 +120,7 @@ const ownerJoined = (socket) => {
 }
 
 const ownerLeft = (socket) => {
-    socket.on('owner-leaves', (uname, lname) => {
+    socket.on('owner-leaves', (lname) => {
         io.to(lname).emit('owner-left-kick-all');
         availableLobbys.delete(lname);
         lobbysWithUsers.delete(lname);
@@ -151,7 +160,7 @@ const userJoiningLobby = (socket) => {
 
 const addToListRequests = (socket) => {
     socket.on('add-to-list-attempt', (uname,lname) => {
-        io.to(lname).emit('add-to-list', uname);
+        io.to(lname).emit('add-to-list', uname, lobbysWithUsers.get(lname));
     });
 }
 
@@ -173,17 +182,8 @@ const getKeyByValueInArray = (map, searched) => {
     }
 }
 
-const getLastItemInMap = (map) => [...map][map.size-1];
-const getLastKeyInMap = (map) => [...map][map.size-1][0];
-const getLastValueInMap = (map) => {
-    let tab = [...map][map.size-1];
-    if(tab === undefined){
-        return false;
-    }
-    let val = tab[1];
-    if(val == undefined){
-        return false;
-    }
-
-    return val;
+const arrayRemove = (arr, value) => {
+    return arr.filter(function(ele){ 
+            return ele != value; 
+        });
 }
