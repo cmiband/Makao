@@ -1,5 +1,4 @@
 const express = require('express');
-const { appendFileSync } = require('fs');
 const app = express();
 const server = require('http').createServer(app);
 const port = 3000;
@@ -93,32 +92,14 @@ const onDisconnect = (socket) => {
     if(uname === undefined){
         return;
     }
-    users.delete(socket.id);
-    let lname = getKeyByValue(availableLobbys, uname);
-    if(lname === undefined){
-        return;
-    }
-    else{
-        availableLobbys.delete(lname);
-        lobbysWithUsers.delete(lname);
-    }  
-        
     let lnameByUser = getKeyByValueInArray(lobbysWithUsers, uname);
-    console.log('lname by user: ' +lnameByUser);
-    if(lnameByUser === undefined){
-        console.log('user was not in lobby');
-        return;
+
+    if(lnameByUser !== undefined){
+        let usersInLobby = lobbysWithUsers.get(lnameByUser);
+        let temp = arrayRemove(usersInLobby, uname);
+        lobbysWithUsers.delete(lnameByUser);
+        lobbysWithUsers.set(lnameByUser, temp);
     }
-    console.log('attempt done');
-
-    let usersInLobby = lobbysWithUsers.get(lnameByUser);
-            
-    let temp = arrayRemove(lobbysWithUsers.get(usersInLobby, lnameByUser));
-    lobbysWithUsers.delete(usersInLobby);
-
-    lobbysWithUsers.set(usersInLobby, temp);
-
-    console.log(`user with id ${socket.id} disconnected`);
 }
 
 const ownerJoined = (socket,uname) => {
