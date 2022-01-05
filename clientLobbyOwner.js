@@ -41,5 +41,4 @@ socket.on('add-to-list', (uname, usersTempArray) => {
         users.push(uname);
     }
     let temp = usersTempArray;
-    alert(temp[users.length-1]);
 });
