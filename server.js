@@ -99,6 +99,8 @@ const onDisconnect = (socket) => {
         let temp = arrayRemove(usersInLobby, uname);
         lobbysWithUsers.delete(lnameByUser);
         lobbysWithUsers.set(lnameByUser, temp);
+
+        io.to(lnameByUser).emit('remove-user-from-list', uname);
     }
 }
 

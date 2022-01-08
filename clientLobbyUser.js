@@ -23,8 +23,15 @@ function addPlayerToList(playerName){
     div.classList.add('specificUserInLobby');
     div.id = playerName;
     div.textContent = playerName;
+    div.id = playerName;
     usersInLobby.append(div);
 }
+
+function removePlayerFromList(playerName){
+    const target = document.getElementById(playerName);
+    target.remove();
+}
+
 
 socket.on('user-info-receiver', (nick,lname,owname) => {
     userName = nick;
@@ -47,9 +54,12 @@ socket.on('add-to-list', (uname, usersTempArray) => {
         addPlayerToList(uname);
         users.push(uname);
     }
-    let temp = usersTempArray;
 });
 
 socket.on('owner-left-kick-all', () => {
     leaveLobby();
 })
+
+socket.on('remove-user-from-list', (uname) => {
+    removePlayerFromList(uname);
+});

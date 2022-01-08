@@ -21,7 +21,13 @@ function addPlayerToList(playerName){
     const div = document.createElement("div");
     div.classList.add('specificUserInLobby');
     div.textContent =  playerName;
+    div.id = playerName;
     usersInLobby.append(div);
+}
+
+function removePlayerFromList(playerName){
+    const target = document.getElementById(playerName);
+    target.remove();
 }
 
 socket.on('sendInformationToLobby', (uname,lname) => {
@@ -40,5 +46,8 @@ socket.on('add-to-list', (uname, usersTempArray) => {
         addPlayerToList(uname);
         users.push(uname);
     }
-    let temp = usersTempArray;
+});
+
+socket.on('remove-user-from-list', (uname) => {
+    removePlayerFromList(uname);
 });
