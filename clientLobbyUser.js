@@ -27,29 +27,39 @@ function addPlayerToList(playerName){
     usersInLobby.append(div);
 }
 
+function addToListIterating(arr){
+    for(const name of arr){
+        addPlayerToList(name);
+        users.push(name);
+    }
+}
+
+function removeFromArray(arr,value){
+    return arr.filter(function(ele){ 
+        return ele != value; 
+    });
+}
+
 function removePlayerFromList(playerName){
     const target = document.getElementById(playerName);
     target.remove();
+    let temp = removeFromArray(users, playerName);
+    users = temp;
 }
 
-
-socket.on('user-info-receiver', (nick,lname,owname) => {
+socket.on('user-info-receiver', (nick,lname,owname, usersIn) => {
     userName = nick;
     partyOwnerName = owname;
     lobbyName=lname;
 
-    addPlayerToList(partyOwnerName);
-    users.push(partyOwnerName);
-
-    addPlayerToList(userName);
-    users.push(userName);
+    addToListIterating(usersIn);
 
     title.textContent = `${lobbyName}, lobby gracza ${partyOwnerName}`;
     yourNick.textContent = `Twój nick: ${userName}`;
     socket.emit('add-to-list-attempt', userName, lobbyName);
 });
 
-socket.on('add-to-list', (uname, usersTempArray) => {
+socket.on('add-to-list', (uname) => {
     if(!users.includes(uname)){
         addPlayerToList(uname);
         users.push(uname);

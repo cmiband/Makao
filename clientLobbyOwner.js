@@ -3,6 +3,7 @@ const socket = io('http://localhost:3000');
 const title = document.getElementById('title');
 const leaveButton = document.getElementById('leaveButton');
 const usersInLobby = document.getElementById('usersInLobby');
+const yourNick = document.getElementById('yourNick');
 
 let userName;
 let lobbyName;
@@ -25,9 +26,17 @@ function addPlayerToList(playerName){
     usersInLobby.append(div);
 }
 
+function removeFromArray(arr,value){
+    return arr.filter(function(ele){ 
+        return ele != value; 
+    });
+}
+
 function removePlayerFromList(playerName){
     const target = document.getElementById(playerName);
     target.remove();
+    let temp = removeFromArray(users, playerName);
+    users = temp;
 }
 
 socket.on('sendInformationToLobby', (uname,lname) => {
@@ -38,10 +47,12 @@ socket.on('sendInformationToLobby', (uname,lname) => {
     addPlayerToList(uname);
     users.push(uname);
 
+    yourNick.textContent = "Twój nick: "+userName;
+
     socket.emit('ownerJoinedLobby', uname,socket.id);
 });
 
-socket.on('add-to-list', (uname, usersTempArray) => {
+socket.on('add-to-list', (uname) => {
     if(!users.includes(uname)){
         addPlayerToList(uname);
         users.push(uname);

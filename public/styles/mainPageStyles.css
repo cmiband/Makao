@@ -57,3 +57,10 @@ button:hover{
     margin-right: 80px;
     padding: 10px;
 }
+
+#warn{
+    position: absolute;
+    bottom: 25px;
+    left: 50px;
+    color: red;
+}

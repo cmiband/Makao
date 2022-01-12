@@ -32,7 +32,7 @@ io.on('connection', socket => {
     });
 
     socket.on('create-lobby', (uname,lname)=> {
-        createLobby(uname, lname);
+        createLobby(socket, uname, lname);
     });
 
     socket.on('lobbyPageLoaded', () => {
@@ -65,11 +65,24 @@ const sendToLobby = (socket) => {
     socket.emit('sendInformationToLobby', userName, lobbyName);
 }
 
-const createLobby = (username, lobbyname) =>{
-    userName = username;
-    lobbyName = lobbyname;
-    addLobby(lobbyname,username);
-    addUserToSpecificLobby(lobbyname, username);
+const createLobby = (socket, username, lobbyname) =>{
+    let temp = availableLobbys.get(lobbyname);
+    let tempTwo = getKeyByValue(availableLobbys, username);
+    console.log(`${temp} and ${tempTwo}`);
+
+    if(temp !== undefined || tempTwo !== undefined){
+        socket.emit('lobby-error');
+
+        return;
+    }
+    else{
+        userName = username;
+        lobbyName = lobbyname;
+        addLobby(lobbyname,username);
+        addUserToSpecificLobby(lobbyname, username);
+
+        socket.emit('load-lobby-owner-page');
+    }
 }
 
 const addLobby = (lname, uname) => {
@@ -120,9 +133,18 @@ const joiningLobbyAttempt = (socket, uname, lname) => {
     console.log(`${uname} tries to join lobby named ${lname}`);
     
     if(availableLobbys.get(lname) !== undefined){
+        let temp = lobbysWithUsers.get(lname);
+        if(temp.includes(uname)){
+            socket.emit('username-taken');
+
+            return;
+        }
         socket.emit('lobby-found');
         usersWaitingToJoin.push(uname);
         addUserToSpecificLobby(lname,uname);
+    }
+    else{
+        socket.emit('lobby-not-existing');
     }
 }
 
@@ -132,16 +154,17 @@ const userJoiningLobby = (socket) => {
         return;
     }
     addUser(socket.id, nick);
-    let lobbyName = getKeyByValueInArray(lobbysWithUsers, nick);
-    let lobbyOwnerName = availableLobbys.get(lobbyName);
+    let lname = getKeyByValueInArray(lobbysWithUsers, nick);
+    let lobbyOwnerName = availableLobbys.get(lname);
 
-    socket.join(lobbyName);
+    socket.join(lname);
+    let usersAlreadyIn = lobbysWithUsers.get(lname);
 
-    socket.emit('user-info-receiver', nick, lobbyName, lobbyOwnerName);
+    socket.emit('user-info-receiver', nick, lname, lobbyOwnerName, usersAlreadyIn);
 }
 
 const addToListRequests = (uname, lname) => {
-    io.to(lname).emit('add-to-list', uname, lobbysWithUsers.get(lname));
+    io.to(lname).emit('add-to-list', uname);
 }
 
 const getKeyByValue = (map, searched) => {

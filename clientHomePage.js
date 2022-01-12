@@ -2,6 +2,7 @@ const socket = io('http://localhost:3000');
 
 const createLobbyButton = document.getElementById('createLobbyButton');
 const joinLobbyButton = document.getElementById('joinLobbyButton');
+const warns = document.getElementById('warn');
 
 createLobbyButton.addEventListener('click', createLobby);
 joinLobbyButton.addEventListener('click', joinLobby);
@@ -17,7 +18,7 @@ socket.on('lobby-found', () => {
     document.location.href = '/public/views/lobbyUserSide.html';
 })
 
-async function createLobby(){
+function createLobby(){
     let uname = document.getElementById('nickForCreation').value;
     let lname = document.getElementById('lobbyForCreation').value;
 
@@ -25,7 +26,21 @@ async function createLobby(){
         return;
     }
 
-    await socket.emit('create-lobby', uname,lname);
-    
-    document.location.href = '/public/views/lobby.html';
+    socket.emit('create-lobby', uname,lname);
 }
+
+socket.on('username-taken', ()=>{
+    warns.textContent = "Ten nick jest już zajęty!";
+});
+
+socket.on('lobby-not-existing', ()=>{
+    warns.textContent = "Lobby o danej nazwie nie instnieje!";
+});
+
+socket.on('lobby-error', () => {
+    warns.textContent = "Nie można stworzyć lobby o podanych danych!";
+});
+
+socket.on('load-lobby-owner-page', ()=>{
+    document.location.href = '/public/views/lobby.html';
+});
