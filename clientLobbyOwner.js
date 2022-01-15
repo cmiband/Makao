@@ -2,6 +2,7 @@ const socket = io('http://localhost:3000');
 
 const title = document.getElementById('title');
 const leaveButton = document.getElementById('leaveButton');
+const startButton = document.getElementById('startButton');
 const usersInLobby = document.getElementById('usersInLobby');
 const yourNick = document.getElementById('yourNick');
 
@@ -10,12 +11,17 @@ let lobbyName;
 let users = [];
 
 leaveButton.addEventListener('click', leaveLobby);
+startButton.addEventListener('click', startGame);
 
 socket.emit('lobbyPageLoaded');
 
 function leaveLobby(){
     socket.emit('owner-leaves', lobbyName);
-    document.location.href = '/public/views/index.html';
+    document.location.href = '/index.html';
+}
+
+function startGame(){
+    socket.emit('owner-started-game', lobbyName);
 }
 
 function addPlayerToList(playerName){
@@ -61,4 +67,8 @@ socket.on('add-to-list', (uname) => {
 
 socket.on('remove-user-from-list', (uname) => {
     removePlayerFromList(uname);
+});
+
+socket.on('load-game-for-lobby', ()=>{
+    document.location.href = '/game.html';
 });

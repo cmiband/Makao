@@ -15,7 +15,7 @@ async function joinLobby(){
 }
 
 socket.on('lobby-found', () => {
-    document.location.href = '/public/views/lobbyUserSide.html';
+    document.location.href = '/lobbyUserSide.html';
 })
 
 function createLobby(){
@@ -42,5 +42,5 @@ socket.on('lobby-error', () => {
 });
 
 socket.on('load-lobby-owner-page', ()=>{
-    document.location.href = '/public/views/lobby.html';
+    document.location.href = '/lobby.html';
 });

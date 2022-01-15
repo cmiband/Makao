@@ -15,7 +15,7 @@ leaveButton.addEventListener('click', leaveLobby);
 socket.emit('user-joined-lobby');
 
 function leaveLobby(){
-    document.location.href = '/public/views/index.html';
+    document.location.href = '/index.html';
 }
 
 function addPlayerToList(playerName){
@@ -72,4 +72,8 @@ socket.on('owner-left-kick-all', () => {
 
 socket.on('remove-user-from-list', (uname) => {
     removePlayerFromList(uname);
+});
+
+socket.on('load-game-for-lobby', ()=>{
+    document.location.href = '/game.html';
 });

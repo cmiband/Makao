@@ -5,6 +5,7 @@ const port = 3000;
 const path = require('path');
 const io = require('socket.io')(server);
 const favicon = require('serve-favicon');
+const game = require('./game');
 
 const availableLobbys = new Map();
 const lobbysWithUsers = new Map();
@@ -17,7 +18,7 @@ app.use(favicon(__dirname+'/public/graphics/favicon.ico'));
 app.use(express.static(__dirname));
 
 app.get('/', (req,res)=>{
-    res.sendFile(path.join(__dirname, 'public', 'views', 'index.html'))
+    res.sendFile(path.join(__dirname, 'index.html'))
 });
 
 server.listen(port, () => {
@@ -58,6 +59,10 @@ io.on('connection', socket => {
     socket.on('add-to-list-attempt', (uname, lname)=>{
         addToListRequests(uname,lname);
     });
+
+    socket.on('owner-started-game', (lname) => {
+        ownerStartsGame(lname);
+    });
 });
 
 
@@ -68,7 +73,6 @@ const sendToLobby = (socket) => {
 const createLobby = (socket, username, lobbyname) =>{
     let temp = availableLobbys.get(lobbyname);
     let tempTwo = getKeyByValue(availableLobbys, username);
-    console.log(`${temp} and ${tempTwo}`);
 
     if(temp !== undefined || tempTwo !== undefined){
         socket.emit('lobby-error');
@@ -165,6 +169,10 @@ const userJoiningLobby = (socket) => {
 
 const addToListRequests = (uname, lname) => {
     io.to(lname).emit('add-to-list', uname);
+}
+
+const ownerStartsGame = (lname) => {
+    io.to(lname).emit('load-game-for-lobby');
 }
 
 const getKeyByValue = (map, searched) => {
