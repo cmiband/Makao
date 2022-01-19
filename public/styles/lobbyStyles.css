@@ -62,5 +62,12 @@ button:hover{
 #yourNick{
     position: absolute;
 
-    bottom: 25px;
+    bottom: 30px;
+}
+
+#warn{
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    color: red;
 }

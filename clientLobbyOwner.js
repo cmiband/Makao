@@ -5,6 +5,7 @@ const leaveButton = document.getElementById('leaveButton');
 const startButton = document.getElementById('startButton');
 const usersInLobby = document.getElementById('usersInLobby');
 const yourNick = document.getElementById('yourNick');
+const warn = document.getElementById('warn');
 
 let userName;
 let lobbyName;
@@ -21,7 +22,15 @@ function leaveLobby(){
 }
 
 function startGame(){
-    socket.emit('owner-started-game', lobbyName);
+    if(users.length <= 2){
+        warn.textContent = 'Za mało graczy do zaczęcia gry!';
+    }
+    else if(users.length > 4){
+        warn.textContent = 'Za dużo graczy do zaczęcia gry!';
+    }
+    else{
+        socket.emit('owner-started-game', lobbyName);
+    }
 }
 
 function addPlayerToList(playerName){
@@ -69,6 +78,6 @@ socket.on('remove-user-from-list', (uname) => {
     removePlayerFromList(uname);
 });
 
-socket.on('load-game-for-lobby', ()=>{
-    document.location.href = '/game.html';
+socket.on('load-admin-game', ()=>{
+    document.location.href = '/gameOwner.html';
 });

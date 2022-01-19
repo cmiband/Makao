@@ -172,6 +172,7 @@ const addToListRequests = (uname, lname) => {
 }
 
 const ownerStartsGame = (lname) => {
+    io.to(lname).emit('load-admin-game');
     io.to(lname).emit('load-game-for-lobby');
 }
 

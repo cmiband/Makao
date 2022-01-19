@@ -75,5 +75,5 @@ socket.on('remove-user-from-list', (uname) => {
 });
 
 socket.on('load-game-for-lobby', ()=>{
-    document.location.href = '/game.html';
+    document.location.href = '/gameUser.html';
 });
