@@ -6,6 +6,9 @@ const startButton = document.getElementById('startButton');
 const usersInLobby = document.getElementById('usersInLobby');
 const yourNick = document.getElementById('yourNick');
 const warn = document.getElementById('warn');
+const rootElement = document.getElementById('root');
+
+let gameBoard;
 
 let userName;
 let lobbyName;
@@ -29,7 +32,7 @@ function startGame(){
         warn.textContent = 'Za dużo graczy do zaczęcia gry!';
     }
     else{
-        socket.emit('owner-started-game', lobbyName);
+        socket.emit('owner-started-game', lobbyName, userName);
     }
 }
 
@@ -78,6 +81,12 @@ socket.on('remove-user-from-list', (uname) => {
     removePlayerFromList(uname);
 });
 
-socket.on('load-admin-game', ()=>{
-    document.location.href = '/gameOwner.html';
+socket.on('load-game-for-lobby', ()=>{
+    rootElement.remove();
+    document.title = "Makao i po makale";
+
+    const tempBoard = document.createElement('div');
+    tempBoard.id = 'gameBoard';
+
+    document.body.append(tempBoard);
 });

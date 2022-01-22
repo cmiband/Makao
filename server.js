@@ -5,11 +5,11 @@ const port = 3000;
 const path = require('path');
 const io = require('socket.io')(server);
 const favicon = require('serve-favicon');
-const game = require('./game');
 
 const availableLobbys = new Map();
 const lobbysWithUsers = new Map();
 const users = new Map();
+const games = new Map();
 let usersWaitingToJoin = [];
 let userName;
 let lobbyName;
@@ -60,8 +60,9 @@ io.on('connection', socket => {
         addToListRequests(uname,lname);
     });
 
-    socket.on('owner-started-game', (lname) => {
+    socket.on('owner-started-game', (lname, uname) => {
         ownerStartsGame(lname);
+        createGame(lname, uname);
     });
 });
 
@@ -100,6 +101,10 @@ const addUser = (id,name) => {
 
 const addUserToSpecificLobby = (lname, uname) => {
     lobbysWithUsers.get(lname).push(uname);
+}
+
+const createGame = (lname, uname) => {
+    games.set(lname, uname);
 }
 
 const onDisconnect = (socket) => {
@@ -172,7 +177,6 @@ const addToListRequests = (uname, lname) => {
 }
 
 const ownerStartsGame = (lname) => {
-    io.to(lname).emit('load-admin-game');
     io.to(lname).emit('load-game-for-lobby');
 }
 

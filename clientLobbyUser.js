@@ -4,6 +4,9 @@ const title = document.getElementById('title');
 const yourNick = document.getElementById('yourNick');
 const usersInLobby = document.getElementById('usersInLobby');
 const leaveButton = document.getElementById('leaveButton');
+const rootElement = document.getElementById('root');
+
+let gameBoard;
 
 let userName;
 let partyOwnerName;
@@ -75,5 +78,11 @@ socket.on('remove-user-from-list', (uname) => {
 });
 
 socket.on('load-game-for-lobby', ()=>{
-    document.location.href = '/gameUser.html';
+    rootElement.remove();
+    document.title = "Makao i po makale";
+
+    const tempBoard = document.createElement('div');
+    tempBoard.id = 'gameBoard';
+
+    document.body.append(tempBoard);
 });

@@ -1,3 +1,0 @@
-exports.gameLoop = function(){
-
-};

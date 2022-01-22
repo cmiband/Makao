@@ -1,0 +1,13 @@
+#gameBoard{
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    background-color: rgb(241, 241, 241);
+
+    position: relative;
+    margin: auto;
+    width: 95%;
+    height: 850px;
+
+    border: 1px solid gray;
+    border-radius: 25px;
+    padding: 10px;
+}
