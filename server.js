@@ -14,6 +14,20 @@ let usersWaitingToJoin = [];
 let userName;
 let lobbyName;
 
+const basicDeck = ['2karo','2kier','2trefl','2pik',
+                    '3karo', '3kier', '3trefl', '3pik',
+                    '4karo', '4kier', '4trefl', '4pik',
+                    '5karo', '5kier', '5trefl', '5pik',
+                    '6karo', '6kier', '6trefl', '6pik',
+                    '7karo', '7kier', '7trefl', '7pik',
+                    '8karo', '8kier', '8trefl', '8pik',
+                    '9karo', '9kier', '9trefl', '9pik',
+                    '10karo', '10kier', '10trefl', '10pik',
+                    'jopekkaro', 'jopekkier', 'jopektrefl', 'jopekpik',
+                    'damakaro', 'damakier', 'damatrefl', 'damapik',
+                    'krolkaro', 'krolkier', 'kroltrefl', 'krolpik',
+                    'askaro', 'askier', 'astrefl', 'aspik',];
+
 app.use(favicon(__dirname+'/public/graphics/favicon.ico'));
 app.use(express.static(__dirname));
 
@@ -44,10 +58,6 @@ io.on('connection', socket => {
         ownerJoined(socket, uname);
     });
 
-    socket.on('owner-leaves', (lname)=>{
-        ownerLeft(lname);
-    });
-
     socket.on('join-lobby-attempt', (uname, lname)=>{
         joiningLobbyAttempt(socket, uname, lname);
     });
@@ -62,7 +72,7 @@ io.on('connection', socket => {
 
     socket.on('owner-started-game', (lname, uname) => {
         ownerStartsGame(lname);
-        createGame(lname, uname);
+        createGame(lname);
     });
 });
 
@@ -103,8 +113,8 @@ const addUserToSpecificLobby = (lname, uname) => {
     lobbysWithUsers.get(lname).push(uname);
 }
 
-const createGame = (lname, uname) => {
-    games.set(lname, uname);
+const createGame = (lname) => {
+    games.set(lname, lobbysWithUsers.get(lname));
 }
 
 const onDisconnect = (socket) => {
@@ -117,12 +127,22 @@ const onDisconnect = (socket) => {
     let lnameByUser = getKeyByValueInArray(lobbysWithUsers, uname);
 
     if(lnameByUser !== undefined){
-        let usersInLobby = lobbysWithUsers.get(lnameByUser);
-        let temp = arrayRemove(usersInLobby, uname);
-        lobbysWithUsers.delete(lnameByUser);
-        lobbysWithUsers.set(lnameByUser, temp);
+        let lobbyOwnerName = availableLobbys.get(lnameByUser);
 
-        io.to(lnameByUser).emit('remove-user-from-list', uname);
+        if(lobbyOwnerName !== undefined){
+            io.to(lnameByUser).emit('owner-left-kick-all');
+
+            availableLobbys.delete(lnameByUser);
+            lobbysWithUsers.delete(lnameByUser);
+        }
+        else{     
+            let usersInLobby = lobbysWithUsers.get(lnameByUser);
+            let temp = arrayRemove(usersInLobby, uname);
+            lobbysWithUsers.delete(lnameByUser);
+            lobbysWithUsers.set(lnameByUser, temp);
+
+            io.to(lnameByUser).emit('remove-user-from-list', uname);
+        }
     }
 }
 
@@ -130,12 +150,6 @@ const ownerJoined = (socket,uname) => {
     addUser(socket.id, uname);
 
     socket.join(getKeyByValue(availableLobbys, uname));
-}
-
-const ownerLeft = (lname) => {
-    io.to(lname).emit('owner-left-kick-all');
-    availableLobbys.delete(lname);
-    lobbysWithUsers.delete(lname);
 }
 
 const joiningLobbyAttempt = (socket, uname, lname) => {
@@ -202,4 +216,19 @@ const arrayRemove = (arr, value) => {
     return arr.filter(function(ele){ 
             return ele != value; 
         });
+}
+
+const shuffle = (arr) => {
+    let currentIndex = array.length,  randomIndex;
+  
+    while (currentIndex != 0) {
+
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+  
+      [array[currentIndex], array[randomIndex]] = [
+        array[randomIndex], array[currentIndex]];
+    }
+  
+    return array;
 }
