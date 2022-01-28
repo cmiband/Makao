@@ -13,6 +13,7 @@ let gameBoard;
 let userName;
 let lobbyName;
 let users = [];
+let deck;
 
 leaveButton.addEventListener('click', leaveLobby);
 startButton.addEventListener('click', startGame);
@@ -32,7 +33,7 @@ function startGame(){
         warn.textContent = 'Za dużo graczy do zaczęcia gry!';
     }
     else{
-        socket.emit('owner-started-game', lobbyName, userName);
+        socket.emit('owner-started-game', lobbyName);
     }
 }
 
@@ -89,4 +90,11 @@ socket.on('load-game-for-lobby', ()=>{
     tempBoard.id = 'gameBoard';
 
     document.body.append(tempBoard);
+
+    socket.emit('request-deck', lobbyName);
+});
+
+socket.on('deck-sent', (deckSent) => {
+    deck = deckSent.split(',');
+    alert(deck);
 });

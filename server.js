@@ -14,7 +14,7 @@ let usersWaitingToJoin = [];
 let userName;
 let lobbyName;
 
-const basicDeck = ['2karo','2kier','2trefl','2pik',
+let basicDeck = ['2karo','2kier','2trefl','2pik',
                     '3karo', '3kier', '3trefl', '3pik',
                     '4karo', '4kier', '4trefl', '4pik',
                     '5karo', '5kier', '5trefl', '5pik',
@@ -70,9 +70,13 @@ io.on('connection', socket => {
         addToListRequests(uname,lname);
     });
 
-    socket.on('owner-started-game', (lname, uname) => {
+    socket.on('owner-started-game', (lname) => {
         ownerStartsGame(lname);
         createGame(lname);
+    });
+
+    socket.on('request-deck', (lname) => {
+        sendShuffledDeck(lname);
     });
 });
 
@@ -194,6 +198,24 @@ const ownerStartsGame = (lname) => {
     io.to(lname).emit('load-game-for-lobby');
 }
 
+const sendShuffledDeck = (lname) => {
+    let shuffledDeck = shuffle(basicDeck);
+    let deckSendable = shuffledDeck.join(',');
+    
+    let usersNicks = lobbysWithUsers.get(lname);
+    let usersIds = [];
+
+    for(const user of usersNicks){
+        let userId = getKeyByValue(users, user);
+        usersIds.push(userId);
+        console.log(`id: ${userId}, username: ${user}`);
+
+        //TODO: sending cards to each user
+    }
+
+    io.to(lname).emit('deck-sent', deckSendable);
+}
+
 const getKeyByValue = (map, searched) => {
     for(const [key,value] of map.entries()){
         if(value===searched){
@@ -219,16 +241,16 @@ const arrayRemove = (arr, value) => {
 }
 
 const shuffle = (arr) => {
-    let currentIndex = array.length,  randomIndex;
+    let currentIndex = arr.length,  randomIndex;
   
     while (currentIndex != 0) {
 
       randomIndex = Math.floor(Math.random() * currentIndex);
       currentIndex--;
   
-      [array[currentIndex], array[randomIndex]] = [
-        array[randomIndex], array[currentIndex]];
+      [arr[currentIndex], arr[randomIndex]] = [
+        arr[randomIndex], arr[currentIndex]];
     }
   
-    return array;
+    return arr;
 }
