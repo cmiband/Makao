@@ -14,6 +14,7 @@ let userName;
 let lobbyName;
 let users = [];
 let deck;
+let hand;
 
 leaveButton.addEventListener('click', leaveLobby);
 startButton.addEventListener('click', startGame);
@@ -96,5 +97,9 @@ socket.on('load-game-for-lobby', ()=>{
 
 socket.on('deck-sent', (deckSent) => {
     deck = deckSent.split(',');
-    alert(deck);
+});
+
+socket.on('hand-sent', (handSent)=>{
+    hand = handSent;
+    alert(hand);
 });

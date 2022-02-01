@@ -9,7 +9,7 @@ const favicon = require('serve-favicon');
 const availableLobbys = new Map();
 const lobbysWithUsers = new Map();
 const users = new Map();
-const games = new Map();
+const gamesWithDecks = new Map();
 let usersWaitingToJoin = [];
 let userName;
 let lobbyName;
@@ -72,11 +72,11 @@ io.on('connection', socket => {
 
     socket.on('owner-started-game', (lname) => {
         ownerStartsGame(lname);
-        createGame(lname);
     });
 
     socket.on('request-deck', (lname) => {
         sendShuffledDeck(lname);
+        sendHandToEachUser(lname);
     });
 });
 
@@ -117,8 +117,8 @@ const addUserToSpecificLobby = (lname, uname) => {
     lobbysWithUsers.get(lname).push(uname);
 }
 
-const createGame = (lname) => {
-    games.set(lname, lobbysWithUsers.get(lname));
+const addDeckToGame = (lname, deck) => {
+    gamesWithDecks.set(lname, deck);
 }
 
 const onDisconnect = (socket) => {
@@ -201,19 +201,31 @@ const ownerStartsGame = (lname) => {
 const sendShuffledDeck = (lname) => {
     let shuffledDeck = shuffle(basicDeck);
     let deckSendable = shuffledDeck.join(',');
-    
+
+    addDeckToGame(lname, deckSendable);
+
+    io.to(lname).emit('deck-sent', deckSendable);
+    console.log('deck sent to lobby');
+}
+
+const sendHandToEachUser = (lname) => {
+    let deck = gamesWithDecks.get(lname);
+    let deckArr = deck.split(',');
     let usersNicks = lobbysWithUsers.get(lname);
-    let usersIds = [];
+    let lobbySize = usersNicks.lenght;
+    let counter = 0;
 
     for(const user of usersNicks){
         let userId = getKeyByValue(users, user);
-        usersIds.push(userId);
-        console.log(`id: ${userId}, username: ${user}`);
+        let cards = [];
 
-        //TODO: sending cards to each user
+        for(let i = 0; i<5; i++){
+            cards.push(deckArr[i*lobbySize+counter]);
+        }
+        
+        io.to(userId).emit('hand-sent', cards.join(','));
+        counter++;
     }
-
-    io.to(lname).emit('deck-sent', deckSendable);
 }
 
 const getKeyByValue = (map, searched) => {

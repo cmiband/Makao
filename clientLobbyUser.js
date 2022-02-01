@@ -12,6 +12,8 @@ let userName;
 let partyOwnerName;
 let lobbyName;
 let users = [];
+let deck;
+let hand;
 
 leaveButton.addEventListener('click', leaveLobby);
 
@@ -85,4 +87,13 @@ socket.on('load-game-for-lobby', ()=>{
     tempBoard.id = 'gameBoard';
 
     document.body.append(tempBoard);
+});
+
+socket.on('deck-sent', (deckSent)=>{
+    deck = deckSent;
+});
+
+socket.on('hand-sent', (handSent)=>{
+    hand = handSent;
+    alert(hand);
 });

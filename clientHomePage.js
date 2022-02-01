@@ -7,11 +7,15 @@ const warns = document.getElementById('warn');
 createLobbyButton.addEventListener('click', createLobby);
 joinLobbyButton.addEventListener('click', joinLobby);
 
-async function joinLobby(){
+function joinLobby(){
     let uname = document.getElementById('nickForJoining').value;
     let lname = document.getElementById('lobbyForJoining').value;
 
-    await socket.emit('join-lobby-attempt', uname, lname);
+    if(uname === '' || lname === ''){
+        return;
+    }
+
+    socket.emit('join-lobby-attempt', uname, lname);
 }
 
 socket.on('lobby-found', () => {
