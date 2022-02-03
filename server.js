@@ -212,7 +212,7 @@ const sendHandToEachUser = (lname) => {
     let deck = gamesWithDecks.get(lname);
     let deckArr = deck.split(',');
     let usersNicks = lobbysWithUsers.get(lname);
-    let lobbySize = usersNicks.lenght;
+    let lobbySize = usersNicks.length;
     let counter = 0;
 
     for(const user of usersNicks){
@@ -220,7 +220,8 @@ const sendHandToEachUser = (lname) => {
         let cards = [];
 
         for(let i = 0; i<5; i++){
-            cards.push(deckArr[i*lobbySize+counter]);
+            let card = deckArr[i*lobbySize+counter];
+            cards.push(card);
         }
         
         io.to(userId).emit('hand-sent', cards.join(','));
