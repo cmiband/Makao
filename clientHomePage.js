@@ -16,11 +16,9 @@ function joinLobby(){
     }
 
     socket.emit('join-lobby-attempt', uname, lname);
+    sessionStorage.setItem('joiningname', uname);
+    sessionStorage.setItem('joininglobbyname', lname);
 }
-
-socket.on('lobby-found', () => {
-    document.location.href = '/lobbyUserSide.html';
-})
 
 function createLobby(){
     let uname = document.getElementById('nickForCreation').value;
@@ -31,6 +29,8 @@ function createLobby(){
     }
 
     socket.emit('create-lobby', uname,lname);
+    sessionStorage.setItem('username', uname);
+    sessionStorage.setItem('lobbyname', lname);
 }
 
 socket.on('username-taken', ()=>{
@@ -47,4 +47,8 @@ socket.on('lobby-error', () => {
 
 socket.on('load-lobby-owner-page', ()=>{
     document.location.href = '/lobby.html';
+});
+
+socket.on('lobby-found', () => {
+    document.location.href = '/lobbyUserSide.html';
 });

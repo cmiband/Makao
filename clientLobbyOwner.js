@@ -10,8 +10,8 @@ const rootElement = document.getElementById('root');
 
 let gameBoard;
 
-let userName;
-let lobbyName;
+let userName = sessionStorage.getItem('username');
+let lobbyName = sessionStorage.getItem('lobbyname');
 let users = [];
 let deck;
 let hand;
@@ -19,7 +19,14 @@ let hand;
 leaveButton.addEventListener('click', leaveLobby);
 startButton.addEventListener('click', startGame);
 
-socket.emit('lobbyPageLoaded');
+socket.emit('lobbyPageLoaded', userName, socket.id);
+
+title.innerHTML = `${lobbyName}, lobby gracza ${userName}`;
+
+addPlayerToList(userName);
+users.push(userName);
+
+yourNick.textContent = "Twój nick: "+userName;
 
 function leaveLobby(){
     socket.emit('owner-leaves', lobbyName);
@@ -58,19 +65,6 @@ function removePlayerFromList(playerName){
     let temp = removeFromArray(users, playerName);
     users = temp;
 }
-
-socket.on('sendInformationToLobby', (uname,lname) => {
-    userName = uname;
-    lobbyName = lname;
-    title.innerHTML = `${lobbyName}, lobby gracza ${userName}`;
-
-    addPlayerToList(uname);
-    users.push(uname);
-
-    yourNick.textContent = "Twój nick: "+userName;
-
-    socket.emit('ownerJoinedLobby', uname,socket.id);
-});
 
 socket.on('add-to-list', (uname) => {
     if(!users.includes(uname)){

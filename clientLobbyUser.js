@@ -8,16 +8,16 @@ const rootElement = document.getElementById('root');
 
 let gameBoard;
 
-let userName;
+let userName = sessionStorage.getItem('joiningname');
 let partyOwnerName;
-let lobbyName;
+let lobbyName = sessionStorage.getItem('joininglobbyname');
 let users = [];
 let deck;
 let hand;
 
 leaveButton.addEventListener('click', leaveLobby);
 
-socket.emit('user-joined-lobby');
+socket.emit('user-joined-lobby', userName, lobbyName);
 
 function leaveLobby(){
     document.location.href = '/index.html';
@@ -52,10 +52,8 @@ function removePlayerFromList(playerName){
     users = temp;
 }
 
-socket.on('user-info-receiver', (nick,lname,owname, usersIn) => {
-    userName = nick;
+socket.on('user-info-receiver', (owname, usersIn) => {
     partyOwnerName = owname;
-    lobbyName=lname;
 
     addToListIterating(usersIn);
 
