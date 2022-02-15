@@ -34,6 +34,14 @@ app.get('/', (req,res)=>{
     res.sendFile(path.join(__dirname, 'index.html'))
 });
 
+app.get('/lobbyowner', (req,res)=>{
+    res.sendFile(path.join(__dirname, 'lobby.html'))
+});
+
+app.get('/lobby', (req,res)=>{
+    res.sendFile(path.join(__dirname, 'lobbyUserSide.html'))
+});
+
 server.listen(port, () => {
     console.log("Listening on port "+port);
 });

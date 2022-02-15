@@ -46,9 +46,9 @@ socket.on('lobby-error', () => {
 });
 
 socket.on('load-lobby-owner-page', ()=>{
-    document.location.href = '/lobby.html';
+    window.location = '/lobbyowner';
 });
 
 socket.on('lobby-found', () => {
-    document.location.href = '/lobbyUserSide.html';
+    window.location = '/lobby';
 });

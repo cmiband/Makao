@@ -15,12 +15,14 @@ let users = [];
 let deck;
 let hand;
 
+sessionStorage.clear();
+
 leaveButton.addEventListener('click', leaveLobby);
 
 socket.emit('user-joined-lobby', userName, lobbyName);
 
 function leaveLobby(){
-    document.location.href = '/index.html';
+    window.location = '/';
 }
 
 function addPlayerToList(playerName){

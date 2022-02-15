@@ -16,6 +16,8 @@ let users = [];
 let deck;
 let hand;
 
+sessionStorage.clear();
+
 leaveButton.addEventListener('click', leaveLobby);
 startButton.addEventListener('click', startGame);
 
@@ -30,7 +32,7 @@ yourNick.textContent = "Twój nick: "+userName;
 
 function leaveLobby(){
     socket.emit('owner-leaves', lobbyName);
-    document.location.href = '/index.html';
+    window.location = '/';
 }
 
 function startGame(){
