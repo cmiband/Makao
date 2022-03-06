@@ -7,6 +7,7 @@ const leaveButton = document.getElementById('leaveButton');
 const rootElement = document.getElementById('root');
 
 let gameBoard;
+let playerOnePlace;
 
 let userName = sessionStorage.getItem('joiningname');
 let partyOwnerName;
@@ -54,6 +55,18 @@ function removePlayerFromList(playerName){
     users = temp;
 }
 
+function renderCards(cards){
+    for(const card of cards){
+        let fileName = card + ".png";
+        let path = '/public/graphics/' + fileName;
+        const img = document.createElement("img");
+        img.src = path;
+        img.id = card;
+
+        playerOnePlace.append(img);
+    }
+}
+
 socket.on('user-info-receiver', (owname, usersIn) => {
     partyOwnerName = owname;
 
@@ -95,5 +108,4 @@ socket.on('deck-sent', (deckSent)=>{
 
 socket.on('hand-sent', (handSent)=>{
     hand = handSent;
-    alert(hand);
 });

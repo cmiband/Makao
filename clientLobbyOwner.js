@@ -9,6 +9,7 @@ const warn = document.getElementById('warn');
 const rootElement = document.getElementById('root');
 
 let gameBoard;
+let playerOnePlace;
 
 let userName = sessionStorage.getItem('username');
 let lobbyName = sessionStorage.getItem('lobbyname');
@@ -68,6 +69,18 @@ function removePlayerFromList(playerName){
     users = temp;
 }
 
+function renderCards(cards){
+    for(const card of cards){
+        let fileName = card + ".png";
+        let path = '/public/graphics/' + fileName;
+        const img = document.createElement("img");
+        img.src = path;
+        img.id = card;
+
+        playerOnePlace.append(img);
+    }
+}
+
 socket.on('add-to-list', (uname) => {
     if(!users.includes(uname)){
         addPlayerToList(uname);
@@ -87,6 +100,12 @@ socket.on('load-game-for-lobby', ()=>{
     tempBoard.id = 'gameBoard';
 
     document.body.append(tempBoard);
+    gameBoard = document.getElementById('gameBoard');
+
+    const playerOne = document.createElement("div");
+    playerOne.id = 'player1';
+    playerOnePlace = playerOne;
+    gameBoard.append(playerOne);
 
     socket.emit('request-deck', lobbyName);
 });
@@ -97,5 +116,5 @@ socket.on('deck-sent', (deckSent) => {
 
 socket.on('hand-sent', (handSent)=>{
     hand = handSent;
-    alert(hand);
+    renderCards(hand.split(','));
 });

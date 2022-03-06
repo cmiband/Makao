@@ -10,7 +10,6 @@ const availableLobbys = new Map();
 const lobbysWithUsers = new Map();
 const users = new Map();
 const gamesWithDecks = new Map();
-let usersWaitingToJoin = [];
 
 let basicDeck = ['2karo','2kier','2trefl','2pik',
                     '3karo', '3kier', '3trefl', '3pik',
@@ -123,6 +122,10 @@ const addDeckToGame = (lname, deck) => {
     gamesWithDecks.set(lname, deck);
 }
 
+const changeDeckOfTheGame = (lname, deck) => {
+    gamesWithDecks.set(lname, deck);
+}
+
 const onDisconnect = (socket) => {
     console.log(`user with id ${socket.id} disconnected`);
 
@@ -202,9 +205,6 @@ const sendShuffledDeck = (lname) => {
     let deckSendable = shuffledDeck.join(',');
 
     addDeckToGame(lname, deckSendable);
-
-    io.to(lname).emit('deck-sent', deckSendable);
-    console.log('deck sent to lobby');
 }
 
 const sendHandToEachUser = (lname) => {
@@ -224,8 +224,14 @@ const sendHandToEachUser = (lname) => {
         }
         
         io.to(userId).emit('hand-sent', cards.join(','));
+        deckArr = deleteCardsFromDeck(cards, lname);
         counter++;
     }
+
+    io.to(lname).emit('deck-sent', deckArr.join(','));
+    changeDeckOfTheGame(lname, deckArr.join(','));
+    console.log('deck sent to lobby');
+    
 }
 
 const getKeyByValue = (map, searched) => {
@@ -265,4 +271,15 @@ const shuffle = (arr) => {
     }
   
     return arr;
+}
+
+const deleteCardsFromDeck = (cards, lname) => {
+    let deck = gamesWithDecks.get(lname);
+    let deckAsArray = deck.split(',');
+    for(const card of cards){
+        let temp = arrayRemove(deckAsArray, card);
+        deckAsArray = temp;
+    }
+
+    return deckAsArray;
 }
