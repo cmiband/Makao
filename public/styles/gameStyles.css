@@ -20,9 +20,38 @@
     width: 50%;
 }
 
+#player2{
+    position: absolute;
+    left: 5%;
+    bottom: 30%;
+    margin: auto;
+}
+
+#player3{
+    position: absolute;
+    left: 30%;
+    top: 5%;
+    margin: auto;
+}
+
+#player4{
+    position: absolute;
+    right: 5%;
+    bottom: 30%;
+    margin: auto;
+}
+
 img{
     width: 75px;
     height: 90px;
     margin: 5px 5px;
+}
+
+.imgHorizontal{
+    transform: rotate(90deg);
+    display: block;
+}
+
+.imgVertical{
     display: inline;
 }
