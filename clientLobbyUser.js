@@ -8,6 +8,9 @@ const rootElement = document.getElementById('root');
 
 let gameBoard;
 let playerOnePlace;
+let playerTwoPlace;
+let playerThreePlace;
+let playerFourPlace;
 
 let userName = sessionStorage.getItem('joiningname');
 let partyOwnerName;
@@ -64,6 +67,41 @@ function renderCards(cards){
         img.id = card;
 
         playerOnePlace.append(img);
+        console.log('cards being rendered');
+    }
+}
+
+function renderOtherPlayers(){
+    for(let i = 0; i<users.length-1; i++){
+        if(i%2==0){
+            for(let j = 0; j<5; j++){
+                let fileName = "rewers.png";
+                let path = '/public/graphics/' + fileName;
+                const card = document.createElement('img');
+                card.src = path;
+                card.id = "rewers"+j+","+i;
+                card.className = "imgHorizontal";
+
+                if(i==0){
+                    playerTwoPlace.append(card);
+                }
+                if(i==2){
+                    playerFourPlace.append(card);
+                }
+            }
+        }
+        else{
+            for(let j = 0; j<5; j++){
+                let fileName = "rewers.png";
+                let path = '/public/graphics/' + fileName;
+                const card = document.createElement('img');
+                card.src = path;
+                card.id = "rewers"+j+","+i;
+                card.className = "imgVertical";
+
+                playerThreePlace.append(card);
+            }
+        }
     }
 }
 
@@ -100,6 +138,27 @@ socket.on('load-game-for-lobby', ()=>{
     tempBoard.id = 'gameBoard';
 
     document.body.append(tempBoard);
+    gameBoard = document.getElementById('gameBoard');
+
+    const playerOne = document.createElement("div");
+    playerOne.id = 'player1';
+    playerOnePlace = playerOne;
+    gameBoard.append(playerOne);
+
+    const playerTwo = document.createElement("div");
+    playerTwo.id = 'player2';
+    playerTwoPlace = playerTwo;
+    gameBoard.append(playerTwo);
+
+    const playerThree = document.createElement("div");
+    playerThree.id = 'player3';
+    playerThreePlace = playerThree;
+    gameBoard.append(playerThree);
+
+    const playerFour = document.createElement("div");
+    playerFour.id = 'player4';
+    playerFourPlace = playerFour;
+    gameBoard.append(playerFour);
 });
 
 socket.on('deck-sent', (deckSent)=>{
@@ -108,4 +167,6 @@ socket.on('deck-sent', (deckSent)=>{
 
 socket.on('hand-sent', (handSent)=>{
     hand = handSent;
+    renderCards(hand.split(','));
+    renderOtherPlayers();
 });

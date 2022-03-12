@@ -82,6 +82,7 @@ function renderCards(cards){
         img.className = 'imgVertical';
 
         playerOnePlace.append(img);
+        console.log('cards being rendered');
     }
 }
 
