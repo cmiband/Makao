@@ -169,4 +169,5 @@ socket.on('hand-sent', (handSent)=>{
     hand = handSent;
     renderCards(hand.split(','));
     renderOtherPlayers();
+    console.log('deck received');
 });

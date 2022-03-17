@@ -134,6 +134,7 @@ const onDisconnect = (socket) => {
         return;
     }
     let lnameByUser = getKeyByValueInArray(lobbysWithUsers, uname);
+    users.delete(socket.id);
 
     if(lnameByUser !== undefined){
         let lobbyOwnerName = availableLobbys.get(lnameByUser);
@@ -158,6 +159,10 @@ const onDisconnect = (socket) => {
 
             console.log(`member with id: ${socket.id} left`);
             console.log(availableLobbys);
+        }
+
+        if(gamesWithDecks.get(lnameByUser) !== undefined){
+            gamesWithDecks.delete(lnameByUser);
         }
     }
 }
