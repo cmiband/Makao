@@ -71,3 +71,8 @@ button:hover{
     left: 10px;
     color: red;
 }
+
+.kickButton{
+    position: absolute;
+    right: 10px;
+}

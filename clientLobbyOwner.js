@@ -7,6 +7,7 @@ const usersInLobby = document.getElementById('usersInLobby');
 const yourNick = document.getElementById('yourNick');
 const warn = document.getElementById('warn');
 const rootElement = document.getElementById('root');
+let kickButton;
 
 let gameBoard;
 let playerOnePlace;
@@ -57,6 +58,15 @@ function addPlayerToList(playerName){
     div.textContent =  playerName;
     div.id = playerName;
     usersInLobby.append(div);
+
+    if(playerName!=userName){
+        const kbutton = document.createElement("button");
+        kbutton.classList.add('kickButton');
+        kbutton.textContent = "KICK";
+        kbutton.id = playerName+"KICK";
+        kbutton.addEventListener('click', (e) => kickPlayer(playerName));
+        document.getElementById(playerName).append(kbutton);
+    }
 }
 
 function removeFromArray(arr,value){
@@ -118,6 +128,10 @@ function renderOtherPlayers(){
             }
         }
     }
+}
+
+function kickPlayer(playerName){
+    socket.emit('kick-player-request', lobbyName,playerName);
 }
 
 socket.on('add-to-list', (uname) => {

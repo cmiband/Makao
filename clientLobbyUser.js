@@ -171,3 +171,10 @@ socket.on('hand-sent', (handSent)=>{
     renderOtherPlayers();
     console.log('deck received');
 });
+
+socket.on('kick-player-from-lobby', (pname)=>{
+    console.log('received on user side');
+    if(pname==userName){
+        leaveLobby();
+    }
+});

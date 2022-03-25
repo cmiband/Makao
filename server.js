@@ -80,6 +80,11 @@ io.on('connection', socket => {
         sendShuffledDeck(lname);
         sendHandToEachUser(lname);
     });
+
+    socket.on('kick-player-request', (lname, pname)=>{
+        kickFromLobby(pname,lname);
+        console.log(`${lname} wants to kick ${pname}`);
+    })
 });
 
 const setUpLobby = (socket, uname) => {
@@ -124,6 +129,10 @@ const addDeckToGame = (lname, deck) => {
 
 const changeDeckOfTheGame = (lname, deck) => {
     gamesWithDecks.set(lname, deck);
+}
+
+const kickFromLobby = (pname,lname) => {
+    io.to(lname).emit('kick-player-from-lobby', pname);
 }
 
 const onDisconnect = (socket) => {
@@ -276,6 +285,13 @@ const shuffle = (arr) => {
     }
   
     return arr;
+}
+
+const getCardColour = (card) =>{
+    if(card.includes('pik')) return 'pik';
+    if(card.includes('trefl')) return 'trefl';
+    if(card.includes('karo')) return 'karo';
+    if(card.includes('kier')) return 'kier';
 }
 
 const deleteCardsFromDeck = (cards, lname) => {
