@@ -10,6 +10,7 @@ const availableLobbys = new Map();
 const lobbysWithUsers = new Map();
 const users = new Map();
 const gamesWithDecks = new Map();
+const gamesWithTopCard = new Map();
 
 let basicDeck = ['2karo','2kier','2trefl','2pik',
                     '3karo', '3kier', '3trefl', '3pik',
@@ -131,6 +132,10 @@ const changeDeckOfTheGame = (lname, deck) => {
     gamesWithDecks.set(lname, deck);
 }
 
+const setTopCardOfGame = (lname, card) => {
+    gamesWithTopCard.set(lname, card);
+}
+
 const kickFromLobby = (pname,lname) => {
     io.to(lname).emit('kick-player-from-lobby', pname);
 }
@@ -244,8 +249,19 @@ const sendHandToEachUser = (lname) => {
 
     io.to(lname).emit('deck-sent', deckArr.join(','));
     changeDeckOfTheGame(lname, deckArr.join(','));
-    console.log('deck sent to lobby');
-    
+    console.log('deck sent to lobby'); 
+
+    sendTopCardToLobby(lname);
+}
+
+const sendTopCardToLobby = (lname) =>{
+    let deck = gamesWithDecks.get(lname).split(',');
+    let card = deck.pop();
+
+    let newDeck = arrayRemove(deck, card);
+    changeDeckOfTheGame(lname, newDeck.join(','));
+    io.to(lname).emit('top-card', card);
+    setTopCardOfGame(lname, card);
 }
 
 const getKeyByValue = (map, searched) => {

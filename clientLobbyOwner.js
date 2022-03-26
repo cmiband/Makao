@@ -14,6 +14,8 @@ let playerOnePlace;
 let playerTwoPlace;
 let playerThreePlace;
 let playerFourPlace;
+let topCardPlace;
+let topCardName;
 
 let userName = sessionStorage.getItem('username');
 let lobbyName = sessionStorage.getItem('lobbyname');
@@ -175,6 +177,8 @@ socket.on('load-game-for-lobby', ()=>{
     playerFourPlace = playerFour;
     gameBoard.append(playerFour);
 
+
+
     socket.emit('request-deck', lobbyName);
 });
 
@@ -188,3 +192,14 @@ socket.on('hand-sent', (handSent)=>{
     renderOtherPlayers();
     console.log('deck received');
 });
+
+socket.on('top-card', (card)=>{
+    topCardName = card;
+
+    const topCard = document.createElement('img');
+    topCard.id = 'topCard';
+    topCard.src = '/public/graphics/' + card +'.png';
+    topCard.className = "imgVertical";
+    topCardPlace = topCard;
+    gameBoard.append(topCard);
+})
