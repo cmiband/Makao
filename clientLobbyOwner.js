@@ -23,6 +23,8 @@ let users = [];
 let deck;
 let hand;
 
+let move = false;
+
 sessionStorage.clear();
 
 leaveButton.addEventListener('click', leaveLobby);

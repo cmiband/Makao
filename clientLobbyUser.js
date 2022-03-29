@@ -21,6 +21,8 @@ let users = [];
 let deck;
 let hand;
 
+let move = false;
+
 sessionStorage.clear();
 
 leaveButton.addEventListener('click', leaveLobby);
@@ -190,4 +192,10 @@ socket.on('top-card', (card)=>{
     topCard.className = "imgVertical";
     topCardPlace = topCard;
     gameBoard.append(topCard);
+});
+
+socket.on('first-move', (uname) => {
+    if(uname == userName){
+        move = true;
+    }
 });
