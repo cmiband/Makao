@@ -86,7 +86,11 @@ io.on('connection', socket => {
     socket.on('kick-player-request', (lname, pname)=>{
         kickFromLobby(pname,lname);
         console.log(`${lname} wants to kick ${pname}`);
-    })
+    });
+
+    socket.on('count-possibilities', (lname, uname, cards, tcard) => {
+        sendPossibleCards(lname, uname, cards);
+    });
 });
 
 const setUpLobby = (socket, uname) => {
@@ -275,6 +279,22 @@ const sendFirstMoveRequest = (lname, uname) => {
     io.to(lname).emit('first-move', uname);
 }
 
+const sendPossibleCards = (lname, uname, cards, tcard) => {
+    let cardsSplitted = cards.split(',');
+    let topCardColour = getCardColour(tcard);
+    let topCardFigure = getCardFigure(tcard);
+    let possibleCards = [];
+
+    for(const card of cardsSplitted){
+        let currentCardColour = getCardColour(card);
+        let currentCardFigure = getCardFigure(card);
+
+        if(currentCardColour == topCardColour && !isSpecialCard(tcard)){
+            possibleCards.push(card);
+        }
+    }
+}
+
 const getKeyByValue = (map, searched) => {
     for(const [key,value] of map.entries()){
         if(value===searched){
@@ -319,6 +339,26 @@ const getCardColour = (card) =>{
     if(card.includes('trefl')) return 'trefl';
     if(card.includes('karo')) return 'karo';
     if(card.includes('kier')) return 'kier';
+}
+
+const getCardFigure = (card) => {
+    let colour = getCardColour(card);
+
+    return card.replace(colour, '');
+}
+
+const isSpecialCard = (card) => {
+    let colour = getCardColour(card);
+    let figure = getCardFigure(card);
+
+    if(figure == '2' || figure == '3' || figure == '4' || figure == 'jopek' || figure == 'as'){
+        return true;
+    }
+    if(figure == 'krol' && (colour == 'pik' || colour == 'kier')){
+        return true;
+    }
+
+    return false;
 }
 
 const deleteCardsFromDeck = (cards, lname) => {

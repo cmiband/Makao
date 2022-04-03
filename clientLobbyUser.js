@@ -13,6 +13,7 @@ let playerThreePlace;
 let playerFourPlace;
 let topCardPlace;
 let topCardName;
+let deckCard;
 
 let userName = sessionStorage.getItem('joiningname');
 let partyOwnerName;
@@ -192,10 +193,20 @@ socket.on('top-card', (card)=>{
     topCard.className = "imgVertical";
     topCardPlace = topCard;
     gameBoard.append(topCard);
+
+    const dCard = document.createElement('img');
+    dCard.id = 'deckTopCard';
+    dCard.src = '/public/graphics/rewers.png';
+    dCard.className = "imgVertical";
+    deckCard = dCard;
+    gameBoard.append(dCard);
 });
 
 socket.on('first-move', (uname) => {
     if(uname == userName){
+        alert("it's my move");
         move = true;
+
+        socket.emit('count-possibilities', lobbyName, uname, deck, topCardName);
     }
 });
