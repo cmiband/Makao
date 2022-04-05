@@ -18,9 +18,13 @@ let deckCard;
 let userName = sessionStorage.getItem('joiningname');
 let partyOwnerName;
 let lobbyName = sessionStorage.getItem('joininglobbyname');
+if(userName == null || lobbyName == null){
+    window.location = '/';
+}
 let users = [];
 let deck;
 let hand;
+let possibleCards = [];
 
 let move = false;
 
@@ -208,5 +212,11 @@ socket.on('first-move', (uname) => {
         move = true;
 
         socket.emit('count-possibilities', lobbyName, uname, deck, topCardName);
+    }
+});
+
+socket.on('possible-cards', (uname, cards)=>{
+    if(uname == userName){
+        possibleCards = cards.split(',');
     }
 });

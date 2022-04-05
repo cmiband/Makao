@@ -20,9 +20,13 @@ let deckCard;
 
 let userName = sessionStorage.getItem('username');
 let lobbyName = sessionStorage.getItem('lobbyname');
+if(userName == null || lobbyName == null){
+    window.location = '/';
+}
 let users = [];
 let deck;
 let hand;
+let possibleCards = [];
 
 let move = false;
 
@@ -211,3 +215,9 @@ socket.on('top-card', (card)=>{
     deckCard = dCard;
     gameBoard.append(dCard);
 })
+
+socket.on('possible-cards', (uname, cards)=>{
+    if(uname == userName){
+        possibleCards = cards.split(',');
+    }
+});

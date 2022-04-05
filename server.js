@@ -89,7 +89,7 @@ io.on('connection', socket => {
     });
 
     socket.on('count-possibilities', (lname, uname, cards, tcard) => {
-        sendPossibleCards(lname, uname, cards);
+        sendPossibleCards(lname, uname, cards, tcard);
     });
 });
 
@@ -289,10 +289,12 @@ const sendPossibleCards = (lname, uname, cards, tcard) => {
         let currentCardColour = getCardColour(card);
         let currentCardFigure = getCardFigure(card);
 
-        if(currentCardColour == topCardColour && !isSpecialCard(tcard)){
+        if((currentCardColour == topCardColour && !isSpecialCard(tcard)) || (currentCardFigure == topCardFigure)){
             possibleCards.push(card);
         }
     }
+
+    io.to(lname).emit('possible-cards', uname, possibleCards.join(','));
 }
 
 const getKeyByValue = (map, searched) => {
