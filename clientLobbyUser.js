@@ -211,12 +211,12 @@ socket.on('first-move', (uname) => {
         alert("it's my move");
         move = true;
 
-        socket.emit('count-possibilities', lobbyName, uname, deck, topCardName);
+        socket.emit('count-possibilities', hand, topCardName, lobbyName);
     }
 });
 
-socket.on('possible-cards', (uname, cards)=>{
-    if(uname == userName){
-        possibleCards = cards.split(',');
-    }
+socket.on('possible-cards', (cards)=>{
+    possibleCards = cards.split(',');
+
+    console.log(possibleCards);
 });
