@@ -74,6 +74,8 @@ function renderCards(cards){
         const img = document.createElement("img");
         img.src = path;
         img.id = card;
+        img.draggable = true;
+        img.ondragstart = drag;
 
         playerOnePlace.append(img);
         console.log('cards being rendered');
@@ -110,6 +112,25 @@ function renderOtherPlayers(){
 
                 playerThreePlace.append(card);
             }
+        }
+    }
+}
+
+function allowDrop(ev) {
+    ev.preventDefault();
+}
+  
+ function drag(ev) {
+    ev.dataTransfer.setData("text", ev.target.id);
+}
+  
+function drop(ev) {
+    if(move){
+        ev.preventDefault();
+        let data = ev.dataTransfer.getData("text");
+        console.log(data);
+        if(possibleCards.includes(data)){   
+            ev.target.appendChild(document.getElementById(data));
         }
     }
 }
@@ -191,12 +212,18 @@ socket.on('kick-player-from-lobby', (pname)=>{
 socket.on('top-card', (card)=>{
     topCardName = card;
 
+    const boardCentre = document.createElement('div');
+    boardCentre.id = 'boardCentre';
+    boardCentre.ondrop = drop;
+    boardCentre.ondragover = allowDrop;
+    gameBoard.append(boardCentre);
+
     const topCard = document.createElement('img');
     topCard.id = 'topCard';
     topCard.src = '/public/graphics/' + card + '.png';
     topCard.className = "imgVertical";
     topCardPlace = topCard;
-    gameBoard.append(topCard);
+    boardCentre.append(topCard);
 
     const dCard = document.createElement('img');
     dCard.id = 'deckTopCard';

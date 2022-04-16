@@ -47,6 +47,18 @@ img{
     margin: 5px 5px;
 }
 
+#boardCentre{
+    width: 75px;
+    height: 90px;
+    border: 1px solid black;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+}
+
 .imgHorizontal{
     transform: rotate(90deg);
     display: block;
@@ -59,12 +71,6 @@ img{
 #topCard{
     max-height: 100%;
     max-width: 100%;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    margin: auto;
 }
 
 #deckTopCard{
