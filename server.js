@@ -92,6 +92,10 @@ io.on('connection', socket => {
     socket.on('count-possibilities', (cards, tcard, lname) => {
         sendPossibleCards(socket, cards, tcard, lname);
     });
+
+    socket.on('new-card-on-top', (lname, uname, card, prevCard) => {
+        moveCommited(lname, uname, card, prevCard);
+    });
 });
 
 const setUpLobby = (socket, uname) => {
@@ -314,6 +318,31 @@ const sendPossibleCards = (socket, cards, tcard, lname) => {
     socket.emit('possible-cards', possibleCards.join(','));
     addOneMoveToGame(lname);
 }
+
+const moveCommited = (lname, uname, card, prevCard) => {
+    setTopCardOfGame(lname, card);
+
+    let deck = gamesWithDecks.get(lname);
+    let deckArr = deck.split(',');
+    deckArr.unshift(prevCard);
+
+    changeDeckOfTheGame(lname, deckArr.join(','));
+
+    let players = lobbysWithUsers.get(lname);
+    let index = players.indexOf(uname);
+
+    if(index == players.length - 1){
+        io.to(lname).emit('new-move', players[0]);
+
+        setPlayersTurn(lname, players[0]);
+    }
+    else{
+        index += 1;
+        io.to(lname).emit('new-move', players[index]);
+
+        setPlayersTurn(lname, players[index]);
+    }
+};
 
 const getKeyByValue = (map, searched) => {
     for(const [key,value] of map.entries()){

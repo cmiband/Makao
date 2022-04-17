@@ -120,18 +120,28 @@ function allowDrop(ev) {
     ev.preventDefault();
 }
   
- function drag(ev) {
-    ev.dataTransfer.setData("text", ev.target.id);
+function drag(ev) {
+    if(move){
+        ev.dataTransfer.setData("text", ev.target.id);
+    }
 }
   
 function drop(ev) {
-    if(move){
-        ev.preventDefault();
-        let data = ev.dataTransfer.getData("text");
-        console.log(data);
-        if(possibleCards.includes(data)){   
-            ev.target.appendChild(document.getElementById(data));
-        }
+    ev.preventDefault();
+    let data = ev.dataTransfer.getData("text");
+    console.log(data);
+    if(possibleCards.includes(data)){   
+        ev.target.appendChild(document.getElementById(data));
+
+        socket.emit('new-card-on-top', lobbyName, userName, data, topCardName);
+        move = false;
+        topCardName = data;
+        
+        let handArr = hand.split(',');
+        let removalIndex = handArr.indexOf(data);
+        handArr.splice(removalIndex, 1);
+
+        hand = handArr.join(',');
     }
 }
 
@@ -246,4 +256,12 @@ socket.on('possible-cards', (cards)=>{
     possibleCards = cards.split(',');
 
     console.log(possibleCards);
+});
+
+socket.on('new-move', (userMoving) => {
+    if(userName == userMoving){
+        move = true;
+        alert('its my move!');
+        socket.emit('count-possibilities', hand, topCardName, lobbyName);
+    }
 });
