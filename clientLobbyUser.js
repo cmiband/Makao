@@ -7,6 +7,7 @@ const leaveButton = document.getElementById('leaveButton');
 const rootElement = document.getElementById('root');
 
 let gameBoard;
+let boardCentreForCard;
 let playerOnePlace;
 let playerTwoPlace;
 let playerThreePlace;
@@ -116,6 +117,17 @@ function renderOtherPlayers(){
     }
 }
 
+function newCardOnTop(newCard){
+    const prevTopCard = boardCentreForCard.firstChild;
+    prevTopCard.remove();
+    
+    const card = document.createElement('img');
+    card.id = 'topCard';
+    card.src = '/public/graphics/' + newCard + '.png';
+    card.className = 'imgVertical';
+    boardCentreForCard.append(card);
+}
+
 function allowDrop(ev) {
     ev.preventDefault();
 }
@@ -131,7 +143,10 @@ function drop(ev) {
     let data = ev.dataTransfer.getData("text");
     console.log(data);
     if(possibleCards.includes(data)){   
-        ev.target.appendChild(document.getElementById(data));
+        newCardOnTop(data);
+
+        const oldCardToRemove = document.getElementById(data);
+        oldCardToRemove.remove();
 
         socket.emit('new-card-on-top', lobbyName, userName, data, topCardName);
         move = false;
@@ -226,6 +241,7 @@ socket.on('top-card', (card)=>{
     boardCentre.id = 'boardCentre';
     boardCentre.ondrop = drop;
     boardCentre.ondragover = allowDrop;
+    boardCentreForCard = boardCentre;
     gameBoard.append(boardCentre);
 
     const topCard = document.createElement('img');
@@ -265,3 +281,9 @@ socket.on('new-move', (userMoving) => {
         socket.emit('count-possibilities', hand, topCardName, lobbyName);
     }
 });
+
+socket.on('change-top-card', (uname, card) => {
+    if(userName != uname){
+        newCardOnTop(card);
+    }
+})

@@ -315,6 +315,10 @@ const sendPossibleCards = (socket, cards, tcard, lname) => {
         }
     }
 
+    if(possibleCards.length == 0){
+        
+    }
+
     socket.emit('possible-cards', possibleCards.join(','));
     addOneMoveToGame(lname);
 }
@@ -325,7 +329,6 @@ const moveCommited = (lname, uname, card, prevCard) => {
     let deck = gamesWithDecks.get(lname);
     let deckArr = deck.split(',');
     deckArr.unshift(prevCard);
-
     changeDeckOfTheGame(lname, deckArr.join(','));
 
     let players = lobbysWithUsers.get(lname);
@@ -342,6 +345,8 @@ const moveCommited = (lname, uname, card, prevCard) => {
 
         setPlayersTurn(lname, players[index]);
     }
+
+    io.to(lname).emit('change-top-card', uname, card);
 };
 
 const getKeyByValue = (map, searched) => {
