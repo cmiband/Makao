@@ -264,7 +264,7 @@ socket.on('first-move', (uname) => {
         alert("it's my move");
         move = true;
 
-        socket.emit('count-possibilities', hand, topCardName, lobbyName);
+        socket.emit('count-possibilities', hand, lobbyName);
     }
 });
 
@@ -276,14 +276,20 @@ socket.on('possible-cards', (cards)=>{
 
 socket.on('new-move', (userMoving) => {
     if(userName == userMoving){
+        possibleCards = [];
+
         move = true;
         alert('its my move!');
-        socket.emit('count-possibilities', hand, topCardName, lobbyName);
+        console.log(topCardName);
+        socket.emit('count-possibilities', hand, lobbyName);
     }
 });
 
 socket.on('change-top-card', (uname, card) => {
     if(userName != uname){
         newCardOnTop(card);
+        topCardName = card;
+
+        alert(topCardName);
     }
 })

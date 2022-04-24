@@ -276,14 +276,19 @@ socket.on('possible-cards', (uname, cards)=>{
 
 socket.on('new-move', (userMoving) => {
     if(userName == userMoving){
+        possibleCards = [];
+
         move = true;
         alert('its my move!');
-        socket.emit('count-possibilities', hand, topCardName, lobbyName);
+        socket.emit('count-possibilities', hand, lobbyName);
     }
 });
 
 socket.on('change-top-card', (uname, card) => {
     if(userName != uname){
         newCardOnTop(card);
+        topCardName = card;
+
+        alert(topCardName);
     }
 })

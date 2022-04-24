@@ -89,8 +89,8 @@ io.on('connection', socket => {
         console.log(`${lname} wants to kick ${pname}`);
     });
 
-    socket.on('count-possibilities', (cards, tcard, lname) => {
-        sendPossibleCards(socket, cards, tcard, lname);
+    socket.on('count-possibilities', (cards, lname) => {
+        sendPossibleCards(socket, cards, lname);
     });
 
     socket.on('new-card-on-top', (lname, uname, card, prevCard) => {
@@ -267,11 +267,11 @@ const sendHandToEachUser = (lname) => {
         
         io.to(userId).emit('hand-sent', cards.join(','));
         deckArr = deleteCardsFromDeck(cards, lname);
+        changeDeckOfTheGame(lname, deckArr.join(','));
         counter++;
     }
 
     io.to(lname).emit('deck-sent', deckArr.join(','));
-    changeDeckOfTheGame(lname, deckArr.join(','));
     console.log('deck sent to lobby'); 
 
     sendTopCardToLobby(lname);
@@ -295,7 +295,8 @@ const sendFirstMoveRequest = (lname, uname) => {
     initiateGameMoves(lname);
 }
 
-const sendPossibleCards = (socket, cards, tcard, lname) => {
+const sendPossibleCards = (socket, cards, lname) => {
+    let tcard = gamesWithTopCard.get(lname);
     let cardsSplitted = cards.split(',');
     let topCardColour = getCardColour(tcard);
     let topCardFigure = getCardFigure(tcard);
@@ -310,8 +311,27 @@ const sendPossibleCards = (socket, cards, tcard, lname) => {
             if((currentCardColour == topCardColour) || (currentCardFigure == topCardFigure)){
                 possibleCards.push(card);
             }
-        } else if((currentCardColour == topCardColour && !isSpecialCard(tcard)) || (currentCardFigure == topCardFigure)){
-            possibleCards.push(card);
+        }else{
+            if(topCardFigure=="dama"){
+                possibleCards.push(card);
+                continue;
+            }
+            if(!isSpecialCard(tcard) && currentCardFigure=="dama"){
+                possibleCards.push(card);
+                continue;
+            }
+            if((currentCardColour == topCardColour) && !isSpecialCard(tcard)){
+                possibleCards.push(card);
+                continue;
+            }
+            if((currentCardFigure == topCardFigure) && !isSpecialCard(tcard)){
+                possibleCards.push(card);
+                continue;
+            }
+            if((currentCardFigure == topCardFigure) && isSpecialCard(tcard)){
+                possibleCards.push(card);
+                continue;
+            }
         }
     }
 
@@ -320,11 +340,12 @@ const sendPossibleCards = (socket, cards, tcard, lname) => {
     }
 
     socket.emit('possible-cards', possibleCards.join(','));
-    addOneMoveToGame(lname);
 }
 
 const moveCommited = (lname, uname, card, prevCard) => {
+    addOneMoveToGame(lname);
     setTopCardOfGame(lname, card);
+    console.log(lname+ " : " +card);
 
     let deck = gamesWithDecks.get(lname);
     let deckArr = deck.split(',');
