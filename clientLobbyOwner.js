@@ -142,6 +142,44 @@ function renderOtherPlayers(){
     }
 }
 
+function addVerticalCard(card, playerId){
+    let fileName = card + ".png";
+    let path = "/public/graphics/" + fileName;
+    
+    const img = document.createElement('img');
+    img.src = path;
+    img.id = card;
+    img.draggable = true;
+    img.ondragstart = drag;
+    img.className = "imgVertical";
+
+    if(playerId == 1){
+        playerOnePlace.append(img);
+    }
+    if(playerId == 3){
+        playerThreePlace.append(img);
+    }
+}
+
+function addHorizontalCard(card, playerId){
+    let fileName = card + ".png";
+    let path = "/public/graphics/" + fileName;
+    
+    const img = document.createElement('img');
+    img.src = path;
+    img.id = card;
+    img.draggable = true;
+    img.ondragstart = drag;
+    img.className = "imgHorizontal";
+
+    if(playerId == 2){
+        playerOnePlace.append(img);
+    }
+    if(playerId == 4){
+        playerThreePlace.append(img);
+    }
+}
+
 function newCardOnTop(newCard){
     const prevTopCard = boardCentreForCard.firstChild;
     prevTopCard.remove();
@@ -177,8 +215,9 @@ function drop(ev) {
         const oldCardToRemove = document.getElementById(data);
         oldCardToRemove.remove();
 
-        socket.emit('new-card-on-top', lobbyName, data);
+        socket.emit('new-card-on-top', lobbyName, userName, data, topCardName);
         move = false;
+        topCardName = data;
 
         let handArr = hand.split(',');
         let removalIndex = handArr.indexOf(data);
@@ -268,10 +307,10 @@ socket.on('top-card', (card)=>{
     gameBoard.append(dCard);
 })
 
-socket.on('possible-cards', (uname, cards)=>{
-    if(uname == userName){
-        possibleCards = cards.split(',');
-    }
+socket.on('possible-cards', (cards)=>{
+    possibleCards = cards.split(',');
+
+    console.log(possibleCards);
 });
 
 socket.on('new-move', (userMoving) => {
@@ -291,4 +330,12 @@ socket.on('change-top-card', (uname, card) => {
 
         alert(topCardName);
     }
-})
+});
+
+socket.on('pull-card', (card) => {
+    let tempHand = hand.split(',');
+    tempHand.push(card);
+    hand = tempHand.join(',');
+    addVerticalCard(card, 1);
+    socket.emit('move-without-new-card', lobbyName, userName);
+});

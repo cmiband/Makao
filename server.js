@@ -96,6 +96,10 @@ io.on('connection', socket => {
     socket.on('new-card-on-top', (lname, uname, card, prevCard) => {
         moveCommited(lname, uname, card, prevCard);
     });
+
+    socket.on('move-without-new-card', (lname, uname) => {
+        moveWithoutNewCard(lname, uname);
+    });
 });
 
 const setUpLobby = (socket, uname) => {
@@ -300,6 +304,8 @@ const sendPossibleCards = (socket, cards, lname) => {
     let cardsSplitted = cards.split(',');
     let topCardColour = getCardColour(tcard);
     let topCardFigure = getCardFigure(tcard);
+    let deck = gamesWithDecks.get(lname);
+    let deckAsArray = deck.split(',');
     let possibleCards = [];
     let moveIndex = gamesWithMoves.get(lname);
 
@@ -336,7 +342,9 @@ const sendPossibleCards = (socket, cards, lname) => {
     }
 
     if(possibleCards.length == 0){
-        
+        let cardToPull = deckAsArray.pop();
+        changeDeckOfTheGame(lname, deckAsArray.join(','));
+        socket.emit('pull-card', cardToPull);
     }
 
     socket.emit('possible-cards', possibleCards.join(','));
@@ -359,6 +367,28 @@ const moveCommited = (lname, uname, card, prevCard) => {
         io.to(lname).emit('new-move', players[0]);
 
         setPlayersTurn(lname, players[0]);
+        console.log(gamesWithPlayersTurn);
+    }
+    else{
+        index += 1;
+        io.to(lname).emit('new-move', players[index]);
+
+        setPlayersTurn(lname, players[index]);
+        console.log(gamesWithPlayersTurn);
+    }
+
+    io.to(lname).emit('change-top-card', uname, card);
+};
+
+const moveWithoutNewCard = (lname, uname) => {
+    addOneMoveToGame(lname);
+    let players = lobbysWithUsers.get(lname);
+    let index = players.indexOf(uname);
+
+    if(index == players.length - 1){
+        io.to(lname).emit('new-move', players[0]);
+
+        setPlayersTurn(lname, players[0]);
     }
     else{
         index += 1;
@@ -366,9 +396,7 @@ const moveCommited = (lname, uname, card, prevCard) => {
 
         setPlayersTurn(lname, players[index]);
     }
-
-    io.to(lname).emit('change-top-card', uname, card);
-};
+}
 
 const getKeyByValue = (map, searched) => {
     for(const [key,value] of map.entries()){

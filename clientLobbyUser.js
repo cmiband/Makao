@@ -24,7 +24,7 @@ if(userName == null || lobbyName == null){
 }
 let users = [];
 let deck;
-let hand;
+let hand = [];
 let possibleCards = [];
 
 let move = false;
@@ -114,6 +114,44 @@ function renderOtherPlayers(){
                 playerThreePlace.append(card);
             }
         }
+    }
+}
+
+function addVerticalCard(card, playerId){
+    let fileName = card + ".png";
+    let path = "/public/graphics/" + fileName;
+    
+    const img = document.createElement('img');
+    img.src = path;
+    img.id = card;
+    img.draggable = true;
+    img.ondragstart = drag;
+    img.className = "imgVertical";
+
+    if(playerId == 1){
+        playerOnePlace.append(img);
+    }
+    if(playerId == 3){
+        playerThreePlace.append(img);
+    }
+}
+
+function addHorizontalCard(card, playerId){
+    let fileName = card + ".png";
+    let path = "/public/graphics/" + fileName;
+    
+    const img = document.createElement('img');
+    img.src = path;
+    img.id = card;
+    img.draggable = true;
+    img.ondragstart = drag;
+    img.className = "imgHorizontal";
+
+    if(playerId == 2){
+        playerOnePlace.append(img);
+    }
+    if(playerId == 4){
+        playerThreePlace.append(img);
     }
 }
 
@@ -292,4 +330,12 @@ socket.on('change-top-card', (uname, card) => {
 
         alert(topCardName);
     }
+})
+
+socket.on('pull-card', (card) => {
+    let tempHand = hand.split(',');
+    tempHand.push(card);
+    hand = tempHand.join(',');
+    addVerticalCard(card, 1);
+    socket.emit('move-without-new-card', lobbyName, userName);
 })
