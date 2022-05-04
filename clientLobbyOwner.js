@@ -227,6 +227,13 @@ function drop(ev) {
     }
 }
 
+function drawCard(){
+    if(move){
+        socket.emit('draw-request', lobbyName);
+    }
+}
+
+
 socket.on('add-to-list', (uname) => {
     if(!users.includes(uname)){
         addPlayerToList(uname);
@@ -267,6 +274,12 @@ socket.on('load-game-for-lobby', ()=>{
     playerFour.id = 'player4';
     playerFourPlace = playerFour;
     gameBoard.append(playerFour);
+
+    const drawButton = document.createElement('button');
+    drawButton.textContent = "DOBIERZ";
+    drawButton.id = "drawButton";
+    drawButton.addEventListener('click', drawCard);
+    gameBoard.append(drawButton);
 
     socket.emit('request-deck', lobbyName);
 });
@@ -338,4 +351,5 @@ socket.on('pull-card', (card) => {
     hand = tempHand.join(',');
     addVerticalCard(card, 1);
     socket.emit('move-without-new-card', lobbyName, userName);
+    move = false;
 });

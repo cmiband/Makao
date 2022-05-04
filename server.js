@@ -100,6 +100,10 @@ io.on('connection', socket => {
     socket.on('move-without-new-card', (lname, uname) => {
         moveWithoutNewCard(lname, uname);
     });
+
+    socket.on('draw-request', (lname)=>{
+        drawByChoice(socket, lname);
+    });
 });
 
 const setUpLobby = (socket, uname) => {
@@ -342,8 +346,7 @@ const sendPossibleCards = (socket, cards, lname) => {
     }
 
     if(possibleCards.length == 0){
-        let cardToPull = deckAsArray.pop();
-        changeDeckOfTheGame(lname, deckAsArray.join(','));
+        let cardToPull = pullOneCardAndChangeDeck(deckAsArray, lname);
         socket.emit('pull-card', cardToPull);
     }
 
@@ -396,6 +399,20 @@ const moveWithoutNewCard = (lname, uname) => {
 
         setPlayersTurn(lname, players[index]);
     }
+}
+
+const drawByChoice = (socket, lname) => {
+    let deck = gamesWithDecks.get(lname);
+    let deckArray = deck.split(',');
+
+    let card = pullOneCardAndChangeDeck(deckArray, lname);
+    socket.emit('pull-card', card);
+};
+
+const pullOneCardAndChangeDeck = (deckArray, lname) => {
+    let card = deckArray.pop();
+    changeDeckOfTheGame(lname, deckArray.join(','));
+    return card;
 }
 
 const getKeyByValue = (map, searched) => {

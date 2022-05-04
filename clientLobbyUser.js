@@ -198,6 +198,12 @@ function drop(ev) {
     }
 }
 
+function drawCard(){
+    if(move){
+        socket.emit('draw-request', lobbyName);
+    }
+}
+
 socket.on('user-info-receiver', (owname, usersIn) => {
     partyOwnerName = owname;
 
@@ -251,6 +257,13 @@ socket.on('load-game-for-lobby', ()=>{
     const playerFour = document.createElement("div");
     playerFour.id = 'player4';
     playerFourPlace = playerFour;
+
+    const drawButton = document.createElement('button');
+    drawButton.textContent = "DOBIERZ";
+    drawButton.id = "drawButton";
+    drawButton.addEventListener('click', drawCard);
+    gameBoard.append(drawButton);
+
     gameBoard.append(playerFour);
 });
 
@@ -327,8 +340,6 @@ socket.on('change-top-card', (uname, card) => {
     if(userName != uname){
         newCardOnTop(card);
         topCardName = card;
-
-        alert(topCardName);
     }
 })
 
@@ -338,4 +349,5 @@ socket.on('pull-card', (card) => {
     hand = tempHand.join(',');
     addVerticalCard(card, 1);
     socket.emit('move-without-new-card', lobbyName, userName);
+    move = false;
 })
