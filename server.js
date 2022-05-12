@@ -13,6 +13,7 @@ const gamesWithDecks = new Map();
 const gamesWithTopCard = new Map();
 const gamesWithPlayersTurn = new Map();
 const gamesWithMoves = new Map();
+const gamesWithAmountOfCardsToPull = new Map();
 
 let basicDeck = ['2karo','2kier','2trefl','2pik',
                     '3karo', '3kier', '3trefl', '3pik',
@@ -171,6 +172,10 @@ const addOneMoveToGame = (lname) => {
     gamesWithMoves.set(lname, addition);
 }
 
+const setCardsToPull = (lname, amount) => {
+    gamesWithAmountOfCardsToPull.set(lname, amount);
+}
+
 const onDisconnect = (socket) => {
     console.log(`user with id ${socket.id} disconnected`);
 
@@ -301,6 +306,7 @@ const sendFirstMoveRequest = (lname, uname) => {
     io.to(lname).emit('first-move', uname);
 
     initiateGameMoves(lname);
+    setCardsToPull(lname, 0);
 }
 
 const sendPossibleCards = (socket, cards, lname) => {
@@ -312,6 +318,7 @@ const sendPossibleCards = (socket, cards, lname) => {
     let deckAsArray = deck.split(',');
     let possibleCards = [];
     let moveIndex = gamesWithMoves.get(lname);
+    let amountOfCardsToPull = gamesWithAmountOfCardsToPull.get(lname);
 
     for(const card of cardsSplitted){
         let currentCardColour = getCardColour(card);
@@ -320,34 +327,64 @@ const sendPossibleCards = (socket, cards, lname) => {
         if(moveIndex == 0){
             if((currentCardColour == topCardColour) || (currentCardFigure == topCardFigure)){
                 possibleCards.push(card);
+                continue;
+            }
+            if(topCardFigure=="dama" || currentCardFigure=="dama"){
+                possibleCards.push(card);
+                continue;
             }
         }else{
-            if(topCardFigure=="dama"){
-                possibleCards.push(card);
-                continue;
-            }
-            if(!isSpecialCard(tcard) && currentCardFigure=="dama"){
-                possibleCards.push(card);
-                continue;
-            }
-            if((currentCardColour == topCardColour) && !isSpecialCard(tcard)){
-                possibleCards.push(card);
-                continue;
-            }
-            if((currentCardFigure == topCardFigure) && !isSpecialCard(tcard)){
-                possibleCards.push(card);
-                continue;
-            }
-            if((currentCardFigure == topCardFigure) && isSpecialCard(tcard)){
-                possibleCards.push(card);
-                continue;
+            if(amountOfCardsToPull==0){
+                if(topCardFigure=="dama"){
+                    possibleCards.push(card);
+                    continue;
+                }
+                if(!isSpecialCard(tcard) && currentCardFigure=="dama"){
+                    possibleCards.push(card);
+                    continue;
+                }
+                if((currentCardColour == topCardColour) && !isSpecialCard(tcard)){
+                    possibleCards.push(card);
+                    continue;
+                }
+                if((currentCardFigure == topCardFigure) && !isSpecialCard(tcard)){
+                    possibleCards.push(card);
+                    continue;
+                }
+                if((currentCardFigure == topCardFigure) && isSpecialCard(tcard)){
+                    possibleCards.push(card);
+                    continue;
+                }
+            }else{
+                if(amountOfCardsToPull%2==0){
+                    if(currentCardFigure=='2'){
+                        possibleCards.push(card);
+                        continue;
+                    }
+                }
+                if(amountOfCardsToPull%3==0){
+                    if(currentCardFigure=='3'){
+                        possibleCards.push(card);
+                        continue;
+                    }
+                }
+                if(tcard=='krolkier'){
+                    if(card=='krolpik'){
+                        possibleCards.push(card);
+                        continue;
+                    }
+                }
             }
         }
     }
 
-    if(possibleCards.length == 0){
+    if(possibleCards.length == 0 && amountOfCardsToPull == 0){
         let cardToPull = pullOneCardAndChangeDeck(deckAsArray, lname);
         socket.emit('pull-card', cardToPull);
+    }else if(possibleCards.length == 0 && amountOfCardsToPull > 0){
+        let cardsToPull = takeCardsToPull(lname, amountOfCardsToPull);
+        socket.emit('special-pull', cardsToPull);
+        setCardsToPull(lname, 0);
     }
 
     socket.emit('possible-cards', possibleCards.join(','));
@@ -413,6 +450,20 @@ const pullOneCardAndChangeDeck = (deckArray, lname) => {
     let card = deckArray.pop();
     changeDeckOfTheGame(lname, deckArray.join(','));
     return card;
+}
+
+const takeCardsToPull = (lname, amount) =>{
+    let deck = gamesWithDecks.get(lname);
+    let deckArr = deck.split(',');
+    let cardsToPull = [];
+
+    for(let i = 0; i<amount; i++){
+        let card = deckArr.pop();
+        cardsToPull.push(card);
+    }
+
+    changeDeckOfTheGame(lname, deckArr.join(','));
+    return cardsToPull;
 }
 
 const getKeyByValue = (map, searched) => {

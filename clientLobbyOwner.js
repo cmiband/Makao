@@ -340,8 +340,6 @@ socket.on('change-top-card', (uname, card) => {
     if(userName != uname){
         newCardOnTop(card);
         topCardName = card;
-
-        alert(topCardName);
     }
 });
 
