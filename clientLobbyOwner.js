@@ -351,3 +351,14 @@ socket.on('pull-card', (card) => {
     socket.emit('move-without-new-card', lobbyName, userName);
     move = false;
 });
+
+socket.on('special-pull', (cards)=>{
+    let tempHand = hand.split(',');
+    for(const card of cards){
+        tempHand.push(card);
+        addVerticalCard(card, 1);
+    }
+    hand = tempHand.join(',');
+    socket.emit('move-without-new-card', lobbyName, userName);
+    move = false;
+});

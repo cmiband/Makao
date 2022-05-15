@@ -12,8 +12,8 @@ const users = new Map();
 const gamesWithDecks = new Map();
 const gamesWithTopCard = new Map();
 const gamesWithPlayersTurn = new Map();
-const gamesWithMoves = new Map();
 const gamesWithAmountOfCardsToPull = new Map();
+const gamesWithCardsHistory = new Map();
 
 let basicDeck = ['2karo','2kier','2trefl','2pik',
                     '3karo', '3kier', '3trefl', '3pik',
@@ -163,17 +163,16 @@ const kickFromLobby = (pname,lname) => {
     io.to(lname).emit('kick-player-from-lobby', pname);
 }
 
-const initiateGameMoves = (lname) => {
-    gamesWithMoves.set(lname, 0);
-}
-
-const addOneMoveToGame = (lname) => {
-    let addition = gamesWithMoves.get(lname) + 1;
-    gamesWithMoves.set(lname, addition);
-}
-
 const setCardsToPull = (lname, amount) => {
     gamesWithAmountOfCardsToPull.set(lname, amount);
+}
+
+const setFirstCardInLobby = (lname, card) => {
+    gamesWithCardsHistory.set(lname, [card]);
+}
+
+const addCardToHistory = (lname, card) => {
+    gamesWithCardsHistory.get(lname).push(card);
 }
 
 const onDisconnect = (socket) => {
@@ -300,12 +299,12 @@ const sendTopCardToLobby = (lname) =>{
     changeDeckOfTheGame(lname, newDeck.join(','));
     io.to(lname).emit('top-card', card);
     setTopCardOfGame(lname, card);
+    setFirstCardInLobby(lname, card);
 }
 
 const sendFirstMoveRequest = (lname, uname) => {
     io.to(lname).emit('first-move', uname);
 
-    initiateGameMoves(lname);
     setCardsToPull(lname, 0);
 }
 
@@ -317,14 +316,14 @@ const sendPossibleCards = (socket, cards, lname) => {
     let deck = gamesWithDecks.get(lname);
     let deckAsArray = deck.split(',');
     let possibleCards = [];
-    let moveIndex = gamesWithMoves.get(lname);
     let amountOfCardsToPull = gamesWithAmountOfCardsToPull.get(lname);
+    let cardsHistory = gamesWithCardsHistory.get(lname);
 
     for(const card of cardsSplitted){
         let currentCardColour = getCardColour(card);
         let currentCardFigure = getCardFigure(card);
 
-        if(moveIndex == 0){
+        if(cardsHistory.length == 1){
             if((currentCardColour == topCardColour) || (currentCardFigure == topCardFigure)){
                 possibleCards.push(card);
                 continue;
@@ -352,6 +351,10 @@ const sendPossibleCards = (socket, cards, lname) => {
                     continue;
                 }
                 if((currentCardFigure == topCardFigure) && isSpecialCard(tcard)){
+                    possibleCards.push(card);
+                    continue;
+                }
+                if((currentCardColour==topCardColour) && isSpecialCard(tcard) && isCardGiving(tcard)){
                     possibleCards.push(card);
                     continue;
                 }
@@ -391,9 +394,25 @@ const sendPossibleCards = (socket, cards, lname) => {
 }
 
 const moveCommited = (lname, uname, card, prevCard) => {
-    addOneMoveToGame(lname);
     setTopCardOfGame(lname, card);
+    addCardToHistory(lname, card);
     console.log(lname+ " : " +card);
+
+    if(isSpecialCard(card)){
+        let cardFigure = getCardFigure(card);
+        let amountToPull = gamesWithAmountOfCardsToPull.get(lname);
+        if(cardFigure=='2'){
+            amountToPull+=2;
+        }
+        if(cardFigure=='3'){
+            amountToPull+=3;
+        }
+        if(card=="krolkier"){
+            amountToPull+=5;
+        }
+        setCardsToPull(lname, amountToPull);
+        console.log(`${lname} has ${amountToPull} cards to pull`);
+    }
 
     let deck = gamesWithDecks.get(lname);
     let deckArr = deck.split(',');
@@ -421,7 +440,6 @@ const moveCommited = (lname, uname, card, prevCard) => {
 };
 
 const moveWithoutNewCard = (lname, uname) => {
-    addOneMoveToGame(lname);
     let players = lobbysWithUsers.get(lname);
     let index = players.indexOf(uname);
 
@@ -503,6 +521,16 @@ const shuffle = (arr) => {
     }
   
     return arr;
+}
+
+const isCardGiving = (card) => {
+    let figure = getCardFigure(card);
+
+    if((figure=='2') || (figure=='3') || (figure=='krolkier') || (figure=='krolpik')){
+        return true;
+    }
+
+    return false;
 }
 
 const getCardColour = (card) =>{
