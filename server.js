@@ -14,6 +14,8 @@ const gamesWithTopCard = new Map();
 const gamesWithPlayersTurn = new Map();
 const gamesWithAmountOfCardsToPull = new Map();
 const gamesWithCardsHistory = new Map();
+const gamesWithTurnsToWait = new Map();
+const gamesWithBlockedPlayers = new Map();
 
 let basicDeck = ['2karo','2kier','2trefl','2pik',
                     '3karo', '3kier', '3trefl', '3pik',
@@ -175,6 +177,34 @@ const addCardToHistory = (lname, card) => {
     gamesWithCardsHistory.get(lname).push(card);
 }
 
+const initiateBlockList = (lname) => {
+    gamesWithBlockedPlayers.set(lname, []);
+}
+
+const initiateBlockTurns = (lname) => {
+    gamesWithTurnsToWait.set(lname, 0);
+}
+
+const addTurnToWait = (lname) => {
+    let turnsToAdd = gamesWithTurnsToWait.get(lname) + 1;
+    gamesWithTurnsToWait.set(lname, turnsToAdd);
+}
+
+const blockPlayer = (lname, uname) => {
+    gamesWithBlockedPlayers.get(lname).push(uname);
+}
+
+const unblockPlayer = (lname, uname) => {
+    let players = gamesWithBlockedPlayers.get(lname);
+    let newList = [];
+    for(const p of players){
+        if(p==uname){
+            newList.push(arrayRemove(players, p));
+        }
+    }
+    gamesWithBlockedPlayers.set(lname, newList);
+}
+
 const onDisconnect = (socket) => {
     console.log(`user with id ${socket.id} disconnected`);
 
@@ -306,6 +336,8 @@ const sendFirstMoveRequest = (lname, uname) => {
     io.to(lname).emit('first-move', uname);
 
     setCardsToPull(lname, 0);
+    initiateBlockList(lname);
+    initiateBlockTurns(lname);
 }
 
 const sendPossibleCards = (socket, cards, lname) => {
