@@ -332,7 +332,7 @@ socket.on('new-move', (userMoving) => {
         move = true;
         alert('its my move!');
         console.log(topCardName);
-        socket.emit('count-possibilities', hand, lobbyName);
+        socket.emit('count-possibilities', hand, lobbyName, userName);
     }
 });
 
