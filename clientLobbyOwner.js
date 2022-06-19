@@ -219,11 +219,8 @@ function drop(ev) {
         move = false;
         topCardName = data;
 
-        let handArr = hand.split(',');
-        let removalIndex = handArr.indexOf(data);
-        handArr.splice(removalIndex, 1);
-
-        hand = handArr.join(',');
+        let removalIndex = hand.indexOf(data);
+        hand.splice(removalIndex, 1);
     }
 }
 
@@ -290,7 +287,7 @@ socket.on('deck-sent', (deckSent) => {
 
 socket.on('hand-sent', (handSent)=>{
     hand = handSent;
-    renderCards(hand.split(','));
+    renderCards(hand);
     renderOtherPlayers();
     console.log('deck received');
 });
@@ -321,7 +318,7 @@ socket.on('top-card', (card)=>{
 })
 
 socket.on('possible-cards', (cards)=>{
-    possibleCards = cards.split(',');
+    possibleCards = cards;
 
     console.log(possibleCards);
 });
@@ -344,21 +341,25 @@ socket.on('change-top-card', (uname, card) => {
 });
 
 socket.on('pull-card', (card) => {
-    let tempHand = hand.split(',');
+    let tempHand = hand;
     tempHand.push(card);
-    hand = tempHand.join(',');
+    hand = tempHand;
     addVerticalCard(card, 1);
     socket.emit('move-without-new-card', lobbyName, userName);
     move = false;
 });
 
 socket.on('special-pull', (cards)=>{
-    let tempHand = hand.split(',');
+    let tempHand = hand;
     for(const card of cards){
         tempHand.push(card);
         addVerticalCard(card, 1);
     }
-    hand = tempHand.join(',');
+    hand = tempHand;
     socket.emit('move-without-new-card', lobbyName, userName);
     move = false;
+});
+
+socket.on('im-blocked', (uname)=>{
+    socket.emit('move-without-new-card', lobbyName, uname);
 });

@@ -295,14 +295,12 @@ const ownerStartsGame = (lname) => {
 
 const sendShuffledDeck = (lname) => {
     let shuffledDeck = shuffle(basicDeck);
-    let deckSendable = shuffledDeck.join(',');
 
-    addDeckToGame(lname, deckSendable);
+    addDeckToGame(lname, shuffledDeck);
 }
 
 const sendHandToEachUser = (lname) => {
     let deck = gamesWithDecks.get(lname);
-    let deckArr = deck.split(',');
     let usersNicks = lobbysWithUsers.get(lname);
     let lobbySize = usersNicks.length;
     let counter = 0;
@@ -312,17 +310,17 @@ const sendHandToEachUser = (lname) => {
         let cards = [];
 
         for(let i = 0; i<5; i++){
-            let card = deckArr[i*lobbySize+counter];
+            let card = deck[i*lobbySize+counter];
             cards.push(card);
         }
         
-        io.to(userId).emit('hand-sent', cards.join(','));
-        deckArr = deleteCardsFromDeck(cards, lname);
-        changeDeckOfTheGame(lname, deckArr.join(','));
+        io.to(userId).emit('hand-sent', cards);
+        deck = deleteCardsFromDeck(cards, lname);
+        changeDeckOfTheGame(lname, deck);
         counter++;
     }
 
-    io.to(lname).emit('deck-sent', deckArr.join(','));
+    io.to(lname).emit('deck-sent', deck);
     console.log('deck sent to lobby'); 
 
     sendTopCardToLobby(lname);
@@ -331,11 +329,11 @@ const sendHandToEachUser = (lname) => {
 }
 
 const sendTopCardToLobby = (lname) =>{
-    let deck = gamesWithDecks.get(lname).split(',');
+    let deck = gamesWithDecks.get(lname);
     let card = deck.pop();
 
     let newDeck = arrayRemove(deck, card);
-    changeDeckOfTheGame(lname, newDeck.join(','));
+    changeDeckOfTheGame(lname, newDeck);
     io.to(lname).emit('top-card', card);
     setTopCardOfGame(lname, card);
     setFirstCardInLobby(lname, card);
@@ -351,17 +349,15 @@ const sendFirstMoveRequest = (lname, uname) => {
 
 const sendPossibleCards = (socket, cards, lname, uname) => {
     let tcard = gamesWithTopCard.get(lname);
-    let cardsSplitted = cards.split(',');
     let topCardColour = getCardColour(tcard);
     let topCardFigure = getCardFigure(tcard);
     let deck = gamesWithDecks.get(lname);
-    let deckAsArray = deck.split(',');
     let possibleCards = [];
     let amountOfCardsToPull = gamesWithAmountOfCardsToPull.get(lname);
     let cardsHistory = gamesWithCardsHistory.get(lname);
     let turnsToWait = gamesWithTurnsToWait.get(lname);
 
-    for(const card of cardsSplitted){
+    for(const card of cards){
         let currentCardColour = getCardColour(card);
         let currentCardFigure = getCardFigure(card);
 
@@ -424,7 +420,7 @@ const sendPossibleCards = (socket, cards, lname, uname) => {
     }
 
     if(possibleCards.length == 0 && amountOfCardsToPull == 0){
-        let cardToPull = pullOneCardAndChangeDeck(deckAsArray, lname);
+        let cardToPull = pullOneCardAndChangeDeck(deck, lname);
         socket.emit('pull-card', cardToPull);
     }else if(possibleCards.length == 0 && amountOfCardsToPull > 0){
         let cardsToPull = takeCardsToPull(lname, amountOfCardsToPull);
@@ -437,7 +433,7 @@ const sendPossibleCards = (socket, cards, lname, uname) => {
         resetTurnsToWaitInLobby(lname);
     }
 
-    socket.emit('possible-cards', possibleCards.join(','));
+    socket.emit('possible-cards', possibleCards);
 }
 
 const moveCommited = (lname, uname, card, prevCard) => {
@@ -466,73 +462,89 @@ const moveCommited = (lname, uname, card, prevCard) => {
         }
     }
 
+
     let deck = gamesWithDecks.get(lname);
-    let deckArr = deck.split(',');
-    deckArr.unshift(prevCard);
-    changeDeckOfTheGame(lname, deckArr.join(','));
+    deck.unshift(prevCard);
+    changeDeckOfTheGame(lname, deck);
 
     let players = lobbysWithUsers.get(lname);
     let index = players.indexOf(uname);
 
     if(index == players.length - 1){
-        io.to(lname).emit('new-move', players[0]);
-
-        setPlayersTurn(lname, players[0]);
-        console.log(gamesWithPlayersTurn);
+        index = 0;
     }
     else{
-        index += 1;
-        io.to(lname).emit('new-move', players[index]);
-
-        setPlayersTurn(lname, players[index]);
-        console.log(gamesWithPlayersTurn);
+        index += 1; 
     }
 
+
+    io.to(lname).emit('new-move', players[index]);
+    setPlayersTurn(lname, players[index]);
+    console.log(gamesWithPlayersTurn);
     io.to(lname).emit('change-top-card', uname, card);
 };
 
 const moveWithoutNewCard = (lname, uname) => {
     let players = lobbysWithUsers.get(lname);
     let index = players.indexOf(uname);
+    let blockedPlayers = gamesWithBlockedPlayers.get(lname);
 
     if(index == players.length - 1){
-        io.to(lname).emit('new-move', players[0]);
+        index = 0;
+        for(const player of players){
+            if(blockedPlayers.includes(player)){
+                index++;
 
-        setPlayersTurn(lname, players[0]);
+                let newTurns = playersWithBlockTurns.get(player) - 1;
+                setPlayerAndTurns(player, newTurns);
+                if(newTurns <= 0){
+                    unblockPlayer(lname, player);
+                }
+            }
+        }  
     }
     else{
         index += 1;
-        io.to(lname).emit('new-move', players[index]);
+        for(const player of players){
+            if(blockedPlayers.includes(player)){
+                index++;
 
-        setPlayersTurn(lname, players[index]);
+                let newTurns = playersWithBlockTurns.get(player) - 1;
+                setPlayerAndTurns(player, newTurns);
+                if(newTurns <= 0){
+                    unblockPlayer(lname, player);
+                }
+            }
+            if(index == players.length-1) index = 0;
+        }
     }
+    io.to(lname).emit('new-move', players[index]);
+    setPlayersTurn(lname, players[index]);
 }
 
 const drawByChoice = (socket, lname) => {
     let deck = gamesWithDecks.get(lname);
-    let deckArray = deck.split(',');
 
-    let card = pullOneCardAndChangeDeck(deckArray, lname);
+    let card = pullOneCardAndChangeDeck(deck, lname);
     socket.emit('pull-card', card);
 };
 
 const pullOneCardAndChangeDeck = (deckArray, lname) => {
     let card = deckArray.pop();
-    changeDeckOfTheGame(lname, deckArray.join(','));
+    changeDeckOfTheGame(lname, deckArray);
     return card;
 }
 
 const takeCardsToPull = (lname, amount) =>{
     let deck = gamesWithDecks.get(lname);
-    let deckArr = deck.split(',');
     let cardsToPull = [];
 
     for(let i = 0; i<amount; i++){
-        let card = deckArr.pop();
+        let card = deck.pop();
         cardsToPull.push(card);
     }
 
-    changeDeckOfTheGame(lname, deckArr.join(','));
+    changeDeckOfTheGame(lname, deck.join(','));
     return cardsToPull;
 }
 
@@ -614,11 +626,10 @@ const isSpecialCard = (card) => {
 
 const deleteCardsFromDeck = (cards, lname) => {
     let deck = gamesWithDecks.get(lname);
-    let deckAsArray = deck.split(',');
     for(const card of cards){
-        let temp = arrayRemove(deckAsArray, card);
-        deckAsArray = temp;
+        let temp = arrayRemove(deck, card);
+        deck = temp;
     }
 
-    return deckAsArray;
+    return deck;
 }
