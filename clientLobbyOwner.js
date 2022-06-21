@@ -282,7 +282,7 @@ socket.on('load-game-for-lobby', ()=>{
 });
 
 socket.on('deck-sent', (deckSent) => {
-    deck = deckSent.split(',');
+    deck = deckSent;
 });
 
 socket.on('hand-sent', (handSent)=>{

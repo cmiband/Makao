@@ -431,6 +431,8 @@ const sendPossibleCards = (socket, cards, lname, uname) => {
         socket.emit("im-blocked", uname);
         setPlayerAndTurns(uname, turnsToWait);
         resetTurnsToWaitInLobby(lname);
+
+        console.log(uname+"is now blocked for "+turnsToWait);
     }
 
     socket.emit('possible-cards', possibleCards);
@@ -459,6 +461,7 @@ const moveCommited = (lname, uname, card, prevCard) => {
         }
         if(cardFigure=='4'){
             addTurnToWait(lname);
+            console.log(gamesWithTurnsToWait.get(lname))
         }
     }
 
@@ -497,6 +500,7 @@ const moveWithoutNewCard = (lname, uname) => {
 
                 let newTurns = playersWithBlockTurns.get(player) - 1;
                 setPlayerAndTurns(player, newTurns);
+                console.log(player +"has " +newTurns+ " more turns to wait");
                 if(newTurns <= 0){
                     unblockPlayer(lname, player);
                 }
@@ -511,6 +515,7 @@ const moveWithoutNewCard = (lname, uname) => {
 
                 let newTurns = playersWithBlockTurns.get(player) - 1;
                 setPlayerAndTurns(player, newTurns);
+                console.log(player +"has " +newTurns+ " more turns to wait");
                 if(newTurns <= 0){
                     unblockPlayer(lname, player);
                 }
@@ -529,9 +534,9 @@ const drawByChoice = (socket, lname) => {
     socket.emit('pull-card', card);
 };
 
-const pullOneCardAndChangeDeck = (deckArray, lname) => {
-    let card = deckArray.pop();
-    changeDeckOfTheGame(lname, deckArray);
+const pullOneCardAndChangeDeck = (deck, lname) => {
+    let card = deck.pop();
+    changeDeckOfTheGame(lname, deck);
     return card;
 }
 
@@ -544,7 +549,7 @@ const takeCardsToPull = (lname, amount) =>{
         cardsToPull.push(card);
     }
 
-    changeDeckOfTheGame(lname, deck.join(','));
+    changeDeckOfTheGame(lname, deck);
     return cardsToPull;
 }
 
