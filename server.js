@@ -15,8 +15,6 @@ const gamesWithPlayersTurn = new Map();
 const gamesWithAmountOfCardsToPull = new Map();
 const gamesWithCardsHistory = new Map();
 const gamesWithTurnsToWait = new Map();
-const gamesWithBlockedPlayers = new Map();
-const playersWithBlockTurns = new Map();
 
 let basicDeck = ['2karo','2kier','2trefl','2pik',
                     '3karo', '3kier', '3trefl', '3pik',
@@ -178,10 +176,6 @@ const addCardToHistory = (lname, card) => {
     gamesWithCardsHistory.get(lname).push(card);
 }
 
-const initiateBlockList = (lname) => {
-    gamesWithBlockedPlayers.set(lname, []);
-}
-
 const initiateBlockTurns = (lname) => {
     gamesWithTurnsToWait.set(lname, 0);
 }
@@ -193,25 +187,6 @@ const addTurnToWait = (lname) => {
 
 const resetTurnsToWaitInLobby = (lname) => {
     gamesWithTurnsToWait.set(lname, 0);
-}
-
-const blockPlayer = (lname, uname) => {
-    gamesWithBlockedPlayers.get(lname).push(uname);
-}
-
-const setPlayerAndTurns = (uname, turns) => {
-    playersWithBlockTurns.set(uname, turns);
-}
-
-const unblockPlayer = (lname, uname) => {
-    let players = gamesWithBlockedPlayers.get(lname);
-    let newList = [];
-    for(const p of players){
-        if(p==uname){
-            newList.push(arrayRemove(players, p));
-        }
-    }
-    gamesWithBlockedPlayers.set(lname, newList);
 }
 
 const onDisconnect = (socket) => {
@@ -343,7 +318,6 @@ const sendFirstMoveRequest = (lname, uname) => {
     io.to(lname).emit('first-move', uname);
 
     setCardsToPull(lname, 0);
-    initiateBlockList(lname);
     initiateBlockTurns(lname);
 }
 
@@ -372,6 +346,10 @@ const sendPossibleCards = (socket, cards, lname, uname) => {
             }
         }else{
             if(amountOfCardsToPull==0){
+                if(topCardFigure=='4' && turnsToWait==0 && (topCardColour==currentCardColour)){
+                    possibleCards.push(card);
+                    continue;
+                }
                 if(topCardFigure=="dama"){
                     possibleCards.push(card);
                     continue;
@@ -396,7 +374,7 @@ const sendPossibleCards = (socket, cards, lname, uname) => {
                     possibleCards.push(card);
                     continue;
                 }
-                if(topCardFigure=='4' && amountOfCardsToPull==0 && (topCardColour==currentCardColour)){
+                if(isCardGiving(tcard) && ((currentCardColour==topCardColour) || (currentCardFigure==topCardFigure))){
                     possibleCards.push(card);
                     continue;
                 }
@@ -431,12 +409,10 @@ const sendPossibleCards = (socket, cards, lname, uname) => {
         socket.emit('special-pull', cardsToPull);
         setCardsToPull(lname, 0);
     }else if(possibleCards.length == 0 && amountOfCardsToPull == 0 && turnsToWait>0){
-        blockPlayer(lname, uname);
-        socket.emit("im-blocked", uname);
-        setPlayerAndTurns(uname, turnsToWait);
+        socket.emit("im-blocked", turnsToWait);
         resetTurnsToWaitInLobby(lname);
 
-        console.log(uname+"is now blocked for "+turnsToWait);
+        console.log(uname+" is now blocked for "+turnsToWait);
     }
 
     socket.emit('possible-cards', possibleCards);
@@ -469,7 +445,6 @@ const moveCommited = (lname, uname, card, prevCard) => {
         }
     }
 
-
     let deck = gamesWithDecks.get(lname);
     deck.unshift(prevCard);
     changeDeckOfTheGame(lname, deck);
@@ -494,42 +469,12 @@ const moveCommited = (lname, uname, card, prevCard) => {
 const moveWithoutNewCard = (lname, uname) => {
     let players = lobbysWithUsers.get(lname);
     let index = players.indexOf(uname);
-    let blockedPlayers = gamesWithBlockedPlayers.get(lname);
 
     if(index == players.length - 1){
         index = 0;
-        if(blockedPlayers.length>0){
-            for(const player of players){
-                if(blockedPlayers.includes(player)){
-                    index++;
-
-                    let newTurns = playersWithBlockTurns.get(player) - 1;
-                    setPlayerAndTurns(player, newTurns);
-                    console.log(player +" has " +newTurns+ " more turns to wait");
-                    if(newTurns <= 0){
-                        unblockPlayer(lname, player);
-                    }
-                }
-            }
-        }  
     }
     else{
         index += 1;
-        if(blockedPlayers.length>0){
-            for(const player of players){
-                if(blockedPlayers.includes(player)){
-                    index++;
-
-                    let newTurns = playersWithBlockTurns.get(player) - 1;
-                    setPlayerAndTurns(player, newTurns);
-                    console.log(player +" has " +newTurns+ " more turns to wait");
-                    if(newTurns <= 0){
-                        unblockPlayer(lname, player);
-                    }
-                }
-                if(index == players.length-1) index = 0;
-            }
-        }
     }
     io.to(lname).emit('new-move', players[index]);
     setPlayersTurn(lname, players[index]);
@@ -619,7 +564,7 @@ const getCardColour = (card) =>{
 
 const getCardFigure = (card) => {
     let colour = getCardColour(card);
-
+ 
     return card.replace(colour, '');
 }
 
@@ -627,7 +572,7 @@ const isSpecialCard = (card) => {
     let colour = getCardColour(card);
     let figure = getCardFigure(card);
 
-    if(figure == '2' || figure == '3' || figure == '4' || figure == 'jopek' || figure == 'as'){
+    if(figure == '2' || figure == '3' || figure == '4' || figure == 'jopek' || figure == 'dama' || figure == 'as'){
         return true;
     }
     if(figure == 'krol' && (colour == 'pik' || colour == 'kier')){

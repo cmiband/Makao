@@ -28,6 +28,8 @@ let hand = [];
 let possibleCards = [];
 
 let move = false;
+let blocked = false;
+let turnsToWait = 0;
 
 sessionStorage.clear();
 
@@ -324,12 +326,21 @@ socket.on('possible-cards', (cards)=>{
 
 socket.on('new-move', (userMoving) => {
     if(userName == userMoving){
-        possibleCards = [];
+        if(!blocked){
+            possibleCards = [];
 
-        move = true;
-        alert('its my move!');
-        console.log(topCardName);
-        socket.emit('count-possibilities', hand, lobbyName, userName);
+            move = true;
+            alert('its my move!');
+            console.log(topCardName);
+            socket.emit('count-possibilities', hand, lobbyName, userName);
+        }
+        else{
+            socket.emit('move-without-new-card', lobbyName, userName);
+            turnsToWait--;
+            if(turnsToWait==0) {
+                blocked = false;
+            }
+        }
     }
 });
 
@@ -360,6 +371,8 @@ socket.on('special-pull', (cards)=>{
     move = false;
 });
 
-socket.on('im-blocked', (uname)=>{
-    socket.emit('move-without-new-card', lobbyName, uname);
+socket.on('im-blocked', (turns)=>{
+    blocked = true;
+    turnsToWait = turns;
+    socket.emit('move-without-new-card', lobbyName, userName);
 });
