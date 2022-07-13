@@ -372,7 +372,9 @@ socket.on('special-pull', (cards)=>{
 });
 
 socket.on('im-blocked', (turns)=>{
-    blocked = true;
-    turnsToWait = turns;
+    if(turns>1){
+        blocked = true;
+        turnsToWait = turns;
+    }
     socket.emit('move-without-new-card', lobbyName, userName);
 });
