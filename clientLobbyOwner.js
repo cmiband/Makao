@@ -280,6 +280,14 @@ socket.on('load-game-for-lobby', ()=>{
     drawButton.addEventListener('click', drawCard);
     gameBoard.append(drawButton);
 
+    const demandedCardForm = document.createElement('form');
+    gameBoard.append(demandedCardForm);
+
+    const labelForDemandedCard = document.createElement('label');
+    labelForDemandedCard.htmlFor = "demandedCards";
+    labelForDemandedCard.textContent = "Wybierz kartę: ";
+    demandedCardForm.append(labelForDemandedCard);
+
     socket.emit('request-deck', lobbyName);
 });
 

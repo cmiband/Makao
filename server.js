@@ -15,6 +15,7 @@ const gamesWithPlayersTurn = new Map();
 const gamesWithAmountOfCardsToPull = new Map();
 const gamesWithCardsHistory = new Map();
 const gamesWithTurnsToWait = new Map();
+const gamesWithDemandedCards = new Map();
 
 let basicDeck = ['2karo','2kier','2trefl','2pik',
                     '3karo', '3kier', '3trefl', '3pik',
@@ -189,6 +190,18 @@ const resetTurnsToWaitInLobby = (lname) => {
     gamesWithTurnsToWait.set(lname, 0);
 }
 
+const initiateDemandedCards = (lname) => {
+    gamesWithDemandedCards.set(lname, '0');
+}
+
+const demandACardInLobby = (lname, cardFigure) =>{
+    gamesWithDemandedCards.set(lname, cardFigure);
+}
+
+const resetDemandedCardInLobby = (lname) => {
+    gamesWithDemandedCards.set(lname, '0');
+}
+
 const onDisconnect = (socket) => {
     console.log(`user with id ${socket.id} disconnected`);
 
@@ -319,6 +332,7 @@ const sendFirstMoveRequest = (lname, uname) => {
 
     setCardsToPull(lname, 0);
     initiateBlockTurns(lname);
+    initiateDemandedCards(lname);
 }
 
 const sendPossibleCards = (socket, cards, lname, uname) => {
@@ -330,6 +344,7 @@ const sendPossibleCards = (socket, cards, lname, uname) => {
     let amountOfCardsToPull = gamesWithAmountOfCardsToPull.get(lname);
     let cardsHistory = gamesWithCardsHistory.get(lname);
     let turnsToWait = gamesWithTurnsToWait.get(lname);
+    let demandedCard = gamesWithDemandedCards.get(lname);
 
     for(const card of cards){
         let currentCardColour = getCardColour(card);
@@ -346,37 +361,49 @@ const sendPossibleCards = (socket, cards, lname, uname) => {
             }
         }else{
             if(amountOfCardsToPull==0){
-                if(topCardFigure=='4' && turnsToWait==0 && (topCardColour==currentCardColour)){
-                    possibleCards.push(card);
-                    continue;
+                if(demandedCard=='0'){
+                    if(topCardFigure=='4' && turnsToWait==0 && (topCardColour==currentCardColour)){
+                        possibleCards.push(card);
+                        continue;
+                    }
+                    if(topCardFigure=="dama"){
+                        possibleCards.push(card);
+                        continue;
+                    }
+                    if(!isSpecialCard(tcard) && currentCardFigure=="dama"){
+                        possibleCards.push(card);
+                        continue;
+                    }
+                    if((currentCardColour == topCardColour) && !isSpecialCard(tcard)){
+                        possibleCards.push(card);
+                        continue;
+                    }
+                    if((currentCardFigure == topCardFigure) && !isSpecialCard(tcard)){
+                        possibleCards.push(card);
+                        continue;
+                    }
+                    if((currentCardFigure == topCardFigure) && isSpecialCard(tcard)){
+                        possibleCards.push(card);
+                        continue;
+                    }
+                    if((currentCardColour==topCardColour) && isSpecialCard(tcard) && isCardGiving(tcard)){
+                        possibleCards.push(card);
+                        continue;
+                    }
+                    if(isCardGiving(tcard) && ((currentCardColour==topCardColour) || (currentCardFigure==topCardFigure))){
+                        possibleCards.push(card);
+                        continue;
+                    }
                 }
-                if(topCardFigure=="dama"){
-                    possibleCards.push(card);
-                    continue;
-                }
-                if(!isSpecialCard(tcard) && currentCardFigure=="dama"){
-                    possibleCards.push(card);
-                    continue;
-                }
-                if((currentCardColour == topCardColour) && !isSpecialCard(tcard)){
-                    possibleCards.push(card);
-                    continue;
-                }
-                if((currentCardFigure == topCardFigure) && !isSpecialCard(tcard)){
-                    possibleCards.push(card);
-                    continue;
-                }
-                if((currentCardFigure == topCardFigure) && isSpecialCard(tcard)){
-                    possibleCards.push(card);
-                    continue;
-                }
-                if((currentCardColour==topCardColour) && isSpecialCard(tcard) && isCardGiving(tcard)){
-                    possibleCards.push(card);
-                    continue;
-                }
-                if(isCardGiving(tcard) && ((currentCardColour==topCardColour) || (currentCardFigure==topCardFigure))){
-                    possibleCards.push(card);
-                    continue;
+                else{
+                    if(currentCardFigure==demandedCard){
+                        possibleCards.push(card);
+                        continue;
+                    }
+                    if((currentCardFigure=='jopek') && (currentCardColour==topCardColour)){
+                        possibleCards.push(card);
+                        continue;
+                    }
                 }
             }else{
                 if(amountOfCardsToPull%2==0){
