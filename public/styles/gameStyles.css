@@ -87,3 +87,9 @@ img{
 
     width: 100px;
 }
+
+.demandedCard{
+    position: absolute;
+    right: 0;
+    top: 0;
+}
