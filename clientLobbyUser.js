@@ -263,6 +263,30 @@ socket.on('load-game-for-lobby', ()=>{
     drawButton.addEventListener('click', drawCard);
     gameBoard.append(drawButton);
 
+    const labelForDemandedCard = document.createElement('label');
+    labelForDemandedCard.className = "demandedCard";
+    labelForDemandedCard.htmlFor = "demandedCards";
+    labelForDemandedCard.textContent = "Wybierz kartę: ";
+    gameBoard.append(labelForDemandedCard);
+
+    const selectDemandedCard = document.createElement('select');
+    selectDemandedCard.className = "demandedCard";
+    selectDemandedCard.name = "demandedCards";
+    gameBoard.append(selectDemandedCard);
+
+    for(let i = 2; i<=10; i++){
+        const option = document.createElement('option');
+        option.value = ""+i;
+        option.textContent = ""+i;
+        selectDemandedCard.append(option);
+    }
+
+    const submit = document.createElement('button');
+    submit.id = "submitChoice";
+    submit.className = "demandedCard";
+    submit.textContent = "WYBIERZ";
+    gameBoard.append(submit);
+
     gameBoard.append(playerFour);
 });
 

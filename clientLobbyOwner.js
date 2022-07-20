@@ -299,8 +299,9 @@ socket.on('load-game-for-lobby', ()=>{
     }
 
     const submit = document.createElement('button');
+    submit.id = "submitChoice";
     submit.className = "demandedCard";
-    submit.textContent = "Wybierz";
+    submit.textContent = "WYBIERZ";
     gameBoard.append(submit);
 
     socket.emit('request-deck', lobbyName);
