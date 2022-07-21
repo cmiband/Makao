@@ -32,6 +32,7 @@ let possibleCards = [];
 let move = false;
 let blocked = false;
 let turnsToWait = 0;
+let jopekToMove = false;
 
 sessionStorage.clear();
 
@@ -213,11 +214,17 @@ function drop(ev) {
     console.log(data);
     if(possibleCards.includes(data)){
         newCardOnTop(data);
+        let cardFigure = getCardFigure(data);
 
         const oldCardToRemove = document.getElementById(data);
         oldCardToRemove.remove();
 
-        socket.emit('new-card-on-top', lobbyName, userName, data, topCardName);
+        if(cardFigure != "jopek"){
+            socket.emit('new-card-on-top', lobbyName, userName, data, topCardName);
+        }
+        else{
+            jopekToMove = true;
+        }
         move = false;
         topCardName = data;
 
@@ -232,6 +239,26 @@ function drawCard(){
     }
 }
 
+function sendChosenCard(){
+    if(jopekToMove){
+        let select = document.getElementById("selectCard");
+
+        socket.emit("cardGotSelected", select.value);
+    }
+}
+
+function getCardFigure(card){
+    let colour = getCardColour(card);
+ 
+    return card.replace(colour, '');
+}
+
+function getCardColour(card){
+    if(card.includes('pik')) return 'pik';
+    if(card.includes('trefl')) return 'trefl';
+    if(card.includes('karo')) return 'karo';
+    if(card.includes('kier')) return 'kier';
+}
 
 socket.on('add-to-list', (uname) => {
     if(!users.includes(uname)){
@@ -288,10 +315,11 @@ socket.on('load-game-for-lobby', ()=>{
 
     const selectDemandedCard = document.createElement('select');
     selectDemandedCard.className = "demandedCard";
+    selectDemandedCard.id = "selectCard";
     selectDemandedCard.name = "demandedCards";
     gameBoard.append(selectDemandedCard);
 
-    for(let i = 2; i<=10; i++){
+    for(let i = 5; i<=10; i++){
         const option = document.createElement('option');
         option.value = ""+i;
         option.textContent = ""+i;

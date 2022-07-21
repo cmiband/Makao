@@ -184,11 +184,14 @@ function drop(ev) {
     console.log(data);
     if(possibleCards.includes(data)){   
         newCardOnTop(data);
+        let newCardFigure = getCardFigure(data);
 
         const oldCardToRemove = document.getElementById(data);
         oldCardToRemove.remove();
 
-        socket.emit('new-card-on-top', lobbyName, userName, data, topCardName);
+        if(newCardFigure != "jopek"){
+            socket.emit('new-card-on-top', lobbyName, userName, data, topCardName);
+        }
         move = false;
         topCardName = data;
         
@@ -201,6 +204,25 @@ function drawCard(){
     if(move){
         socket.emit('draw-request', lobbyName);
     }
+}
+
+function sendChosenCard(){
+    let select = document.getElementById("selectCard");
+
+    socket.emit("cardGotSelected", select.value);
+}
+
+function getCardFigure(card){
+    let colour = getCardColour(card);
+ 
+    return card.replace(colour, '');
+}
+
+function getCardColour(card){
+    if(card.includes('pik')) return 'pik';
+    if(card.includes('trefl')) return 'trefl';
+    if(card.includes('karo')) return 'karo';
+    if(card.includes('kier')) return 'kier';
 }
 
 socket.on('user-info-receiver', (owname, usersIn) => {
