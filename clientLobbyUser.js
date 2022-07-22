@@ -14,6 +14,7 @@ let playerThreePlace;
 let playerFourPlace;
 let topCardPlace;
 let topCardName;
+let previousCard;
 let deckCard;
 
 let userName = sessionStorage.getItem('joiningname');
@@ -185,6 +186,7 @@ function drop(ev) {
     if(possibleCards.includes(data)){   
         newCardOnTop(data);
         let newCardFigure = getCardFigure(data);
+        previousCard = topCardName;
 
         const oldCardToRemove = document.getElementById(data);
         oldCardToRemove.remove();
@@ -209,7 +211,7 @@ function drawCard(){
 function sendChosenCard(){
     let select = document.getElementById("selectCard");
 
-    socket.emit("cardGotSelected", select.value);
+    socket.emit("cardGotSelected", select.value, previousCard, userName, lobbyName);
 }
 
 function getCardFigure(card){
@@ -307,6 +309,7 @@ socket.on('load-game-for-lobby', ()=>{
     submit.id = "submitChoice";
     submit.className = "demandedCard";
     submit.textContent = "WYBIERZ";
+    submit.addEventListener('click', (e)=>sendChosenCard());
     gameBoard.append(submit);
 
     gameBoard.append(playerFour);

@@ -107,6 +107,12 @@ io.on('connection', socket => {
     socket.on('draw-request', (lname)=>{
         drawByChoice(socket, lname);
     });
+
+    socket.on('cardGotSelected', (card, prevCard, uname, lname)=>{
+        let figure = getCardFigure(card);
+        demandACardInLobby(lname, figure);
+        moveCommited(lname, uname, card, prevCard);
+    });
 });
 
 const setUpLobby = (socket, uname) => {
