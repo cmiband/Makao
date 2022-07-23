@@ -19,6 +19,7 @@ let topCardPlace;
 let topCardName;
 let previousCard;
 let deckCard;
+let demandedCardVisual;
 
 let userName = sessionStorage.getItem('username');
 let lobbyName = sessionStorage.getItem('lobbyname');
@@ -246,6 +247,7 @@ function sendChosenCard(){
         let select = document.getElementById("selectCard");
 
         socket.emit("cardGotSelected", select.value, previousCard, userName, lobbyName);
+        changeDemandedCardVisual(select.value);
     }
 }
 
@@ -253,6 +255,14 @@ function getCardFigure(card){
     let colour = getCardColour(card);
  
     return card.replace(colour, '');
+}
+
+function changeDemandedCardVisual(card){
+    let stringToChange = demandedCardVisual.textContent;
+    let len = stringToChange.length;
+    let figure = getCardFigure(card);
+    stringToChange[len-1] = figure;
+    demandedCardVisual.textContent = stringToChange;
 }
 
 function getCardColour(card){
@@ -334,6 +344,12 @@ socket.on('load-game-for-lobby', ()=>{
     submit.textContent = "WYBIERZ";
     submit.addEventListener('click', (e)=>sendChosenCard());
     gameBoard.append(submit);
+
+    const demandedCardText = document.createElement('h3');
+    demandedCardText.textContent = "Żądana karta:  ";
+    demandedCardText.id = 'demandedCardInfo';
+    gameBoard.append(demandedCardText);
+    demandedCardVisual = demandedCardText;
 
     socket.emit('request-deck', lobbyName);
 });

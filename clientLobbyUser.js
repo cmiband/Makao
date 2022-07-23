@@ -16,6 +16,7 @@ let topCardPlace;
 let topCardName;
 let previousCard;
 let deckCard;
+let demandedCardVisual;
 
 let userName = sessionStorage.getItem('joiningname');
 let partyOwnerName;
@@ -31,6 +32,7 @@ let possibleCards = [];
 let move = false;
 let blocked = false;
 let turnsToWait = 0;
+let jopekToMove = false;
 
 sessionStorage.clear();
 
@@ -193,6 +195,8 @@ function drop(ev) {
 
         if(newCardFigure != "jopek"){
             socket.emit('new-card-on-top', lobbyName, userName, data, topCardName);
+        }else{
+            jopekToMove = true;
         }
         move = false;
         topCardName = data;
@@ -209,15 +213,26 @@ function drawCard(){
 }
 
 function sendChosenCard(){
-    let select = document.getElementById("selectCard");
+    if(jopekToMove){
+        let select = document.getElementById("selectCard");
 
-    socket.emit("cardGotSelected", select.value, previousCard, userName, lobbyName);
+        socket.emit("cardGotSelected", select.value, previousCard, userName, lobbyName);
+        changeDemandedCardVisual(select.value);
+    }
 }
 
 function getCardFigure(card){
     let colour = getCardColour(card);
  
     return card.replace(colour, '');
+}
+
+function changeDemandedCardVisual(card){
+    let stringToChange = demandedCardVisual.textContent;
+    let len = stringToChange.length;
+    let figure = getCardFigure(card);
+    stringToChange[len-1] = figure;
+    demandedCardVisual.textContent = stringToChange;
 }
 
 function getCardColour(card){
@@ -280,6 +295,7 @@ socket.on('load-game-for-lobby', ()=>{
     const playerFour = document.createElement("div");
     playerFour.id = 'player4';
     playerFourPlace = playerFour;
+    gameBoard.append(playerFour);
 
     const drawButton = document.createElement('button');
     drawButton.textContent = "DOBIERZ";
@@ -296,9 +312,10 @@ socket.on('load-game-for-lobby', ()=>{
     const selectDemandedCard = document.createElement('select');
     selectDemandedCard.className = "demandedCard";
     selectDemandedCard.name = "demandedCards";
+    selectDemandedCard.id = "selectCard";
     gameBoard.append(selectDemandedCard);
 
-    for(let i = 2; i<=10; i++){
+    for(let i = 5; i<=10; i++){
         const option = document.createElement('option');
         option.value = ""+i;
         option.textContent = ""+i;
@@ -312,7 +329,11 @@ socket.on('load-game-for-lobby', ()=>{
     submit.addEventListener('click', (e)=>sendChosenCard());
     gameBoard.append(submit);
 
-    gameBoard.append(playerFour);
+    const demandedCardText = document.createElement('h3');
+    demandedCardText.textContent = "Żądana karta:  ";
+    demandedCardText.id = 'demandedCardInfo';
+    gameBoard.append(demandedCardText);
+    demandedCardVisual = demandedCardText;
 });
 
 socket.on('deck-sent', (deckSent)=>{

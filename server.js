@@ -16,6 +16,7 @@ const gamesWithAmountOfCardsToPull = new Map();
 const gamesWithCardsHistory = new Map();
 const gamesWithTurnsToWait = new Map();
 const gamesWithDemandedCards = new Map();
+const gamesWithCardDemanders = new Map();
 
 let basicDeck = ['2karo','2kier','2trefl','2pik',
                     '3karo', '3kier', '3trefl', '3pik',
@@ -111,6 +112,7 @@ io.on('connection', socket => {
     socket.on('cardGotSelected', (card, prevCard, uname, lname)=>{
         let figure = getCardFigure(card);
         demandACardInLobby(lname, figure);
+        registerCardDemander(lname, uname);
         moveCommited(lname, uname, card, prevCard);
     });
 });
@@ -206,6 +208,14 @@ const demandACardInLobby = (lname, cardFigure) =>{
 
 const resetDemandedCardInLobby = (lname) => {
     gamesWithDemandedCards.set(lname, '0');
+}
+
+const registerCardDemander = (lname, uname) => {
+    gamesWithCardDemanders.set(lname, uname);
+}
+
+const deleteCardDemander = (lname) => {
+    gamesWithCardDemanders.delete(lname);
 }
 
 const onDisconnect = (socket) => {
@@ -351,6 +361,7 @@ const sendPossibleCards = (socket, cards, lname, uname) => {
     let cardsHistory = gamesWithCardsHistory.get(lname);
     let turnsToWait = gamesWithTurnsToWait.get(lname);
     let demandedCard = gamesWithDemandedCards.get(lname);
+    let cardDemander = gamesWithCardDemanders.get(lname);
 
     for(const card of cards){
         let currentCardColour = getCardColour(card);
@@ -449,6 +460,10 @@ const sendPossibleCards = (socket, cards, lname, uname) => {
     }
 
     socket.emit('possible-cards', possibleCards);
+    if(uname === cardDemander){
+        resetDemandedCardInLobby(lname);
+        deleteCardDemander(lname);
+    }
 }
 
 const moveCommited = (lname, uname, card, prevCard) => {
@@ -491,7 +506,6 @@ const moveCommited = (lname, uname, card, prevCard) => {
     else{
         index += 1; 
     }
-
 
     io.to(lname).emit('new-move', players[index]);
     setPlayersTurn(lname, players[index]);
