@@ -67,6 +67,11 @@ function startGame(){
     }
 }
 
+function setCharAt(str,index,chr) {
+    if(index > str.length-1) return str;
+    return str.substring(0,index) + chr + str.substring(index+1);
+}
+
 function addPlayerToList(playerName){
     const div = document.createElement("div");
     div.classList.add('specificUserInLobby');
@@ -247,7 +252,6 @@ function sendChosenCard(){
         let select = document.getElementById("selectCard");
 
         socket.emit("cardGotSelected", select.value, previousCard, userName, lobbyName);
-        changeDemandedCardVisual(select.value);
     }
 }
 
@@ -257,12 +261,11 @@ function getCardFigure(card){
     return card.replace(colour, '');
 }
 
-function changeDemandedCardVisual(card){
+function changeDemandedCardVisual(figure){
     let stringToChange = demandedCardVisual.textContent;
     let len = stringToChange.length;
-    let figure = getCardFigure(card);
-    stringToChange[len-1] = figure;
-    demandedCardVisual.textContent = stringToChange;
+    let newLabel = setCharAt(stringToChange, len-1, figure);
+    demandedCardVisual.textContent = newLabel;
 }
 
 function getCardColour(card){
@@ -448,4 +451,29 @@ socket.on('im-blocked', (turns)=>{
     }
 
     socket.emit('move-without-new-card', lobbyName, userName);
+});
+
+socket.on('remove-one-card', (uname, index)=>{
+    if(uname != userName){
+        switch(index){
+            case 1:
+                let card1 = playerTwoPlace.firstChild;
+                card1.remove();
+                break;
+            
+            case 2:
+                let card2 = playerThreePlace.firstChild;
+                card2.remove();
+                break;
+
+            case 3:
+                let card3 = playerFourPlace.firstChild;
+                card3.remove();
+                break;
+        }
+    }
+});
+
+socket.on('demandedCard', (cardFigure)=>{
+    changeDemandedCardVisual(cardFigure);
 });

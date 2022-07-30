@@ -44,6 +44,11 @@ function leaveLobby(){
     window.location = '/';
 }
 
+function setCharAt(str,index,chr) {
+    if(index > str.length-1) return str;
+    return str.substring(0,index) + chr + str.substring(index+1);
+}
+
 function addPlayerToList(playerName){
     const div = document.createElement("div");
     div.classList.add('specificUserInLobby');
@@ -217,7 +222,6 @@ function sendChosenCard(){
         let select = document.getElementById("selectCard");
 
         socket.emit("cardGotSelected", select.value, previousCard, userName, lobbyName);
-        changeDemandedCardVisual(select.value);
     }
 }
 
@@ -227,12 +231,11 @@ function getCardFigure(card){
     return card.replace(colour, '');
 }
 
-function changeDemandedCardVisual(card){
+function changeDemandedCardVisual(figure){
     let stringToChange = demandedCardVisual.textContent;
     let len = stringToChange.length;
-    let figure = getCardFigure(card);
-    stringToChange[len-1] = figure;
-    demandedCardVisual.textContent = stringToChange;
+    let newLabel = setCharAt(stringToChange, len-1, figure);
+    demandedCardVisual.textContent = newLabel;
 }
 
 function getCardColour(card){
@@ -447,4 +450,53 @@ socket.on('im-blocked', (turns)=>{
         turnsToWait = turns;
     }
     socket.emit('move-without-new-card', lobbyName, userName);
+});
+
+socket.on('remove-one-card', (uname, index)=>{
+    if(uname != userName){
+        let indexOfUser = users.indexOf(userName);
+        let lobbySize = users.length;
+        if(index == 0){
+            let ownerCard = playerTwoPlace.firstChild;
+            ownerCard.remove();
+        }else{
+            if(lobbySize==3){
+                let card = playerThreePlace.firstChild;
+                card.remove();
+            }else{
+                if(indexOfUser==1){
+                    if(index==2){
+                        let card = playerThreePlace.firstChild;
+                        card.remove();
+                    }
+                    else if(index==3){
+                        let card = playerFourPlace.firstChild;
+                        card.remove();
+                    }
+                }
+                else if(indexOfUser==2){
+                    if(index==1){
+                        let card = playerThreePlace.firstChild;
+                        card.remove();
+                    }
+                    else if(index==3){
+                        let card = playerFourPlace.firstChild;
+                        card.remove();
+                    }
+                }else{
+                    if(index==1){
+                        let card = playerThreePlace.firstChild;
+                        card.remove();
+                    }else if(index==2){
+                        let card = playerFourPlace.firstChild;
+                        card.remove();
+                    }
+                }
+            }
+        }
+    }
+});
+
+socket.on('demandedCard', (cardFigure)=>{
+    changeDemandedCardVisual(cardFigure);
 });

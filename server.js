@@ -114,6 +114,7 @@ io.on('connection', socket => {
         demandACardInLobby(lname, figure);
         registerCardDemander(lname, uname);
         moveCommited(lname, uname, card, prevCard);
+        sendDemandedCardInfoToLobby(lname, figure);
     });
 });
 
@@ -511,13 +512,17 @@ const moveCommited = (lname, uname, card, prevCard) => {
     setPlayersTurn(lname, players[index]);
     console.log(gamesWithPlayersTurn);
     io.to(lname).emit('change-top-card', uname, card);
+
+    let indexOfPreviousPlayer = players.indexOf(uname);
+    
+    io.to(lname).emit('remove-one-card', uname, indexOfPreviousPlayer);
 };
 
 const moveWithoutNewCard = (lname, uname) => {
     let players = lobbysWithUsers.get(lname);
     let index = players.indexOf(uname);
 
-    if(index == players.length - 1){
+    if(index == players.length - 1){ 
         index = 0;
     }
     else{
@@ -525,6 +530,10 @@ const moveWithoutNewCard = (lname, uname) => {
     }
     io.to(lname).emit('new-move', players[index]);
     setPlayersTurn(lname, players[index]);
+}
+
+const sendDemandedCardInfoToLobby = (lname, figure) =>{
+    io.to(lname).emit('demandedCard', figure);
 }
 
 const drawByChoice = (socket, lname) => {
