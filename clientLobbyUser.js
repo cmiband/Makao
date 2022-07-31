@@ -33,6 +33,7 @@ let move = false;
 let blocked = false;
 let turnsToWait = 0;
 let jopekToMove = false;
+let jopekTurnOnGoing = false;
 
 sessionStorage.clear();
 
@@ -191,6 +192,10 @@ function drop(ev) {
     let data = ev.dataTransfer.getData("text");
     console.log(data);
     if(possibleCards.includes(data)){   
+        if(jopekTurnOnGoing){
+            socket.emit('remove-demanded-card-visual', lobbyName);
+            jopekTurnOnGoing = false;
+        }
         newCardOnTop(data);
         let newCardFigure = getCardFigure(data);
         previousCard = topCardName;
@@ -202,6 +207,7 @@ function drop(ev) {
             socket.emit('new-card-on-top', lobbyName, userName, data, topCardName);
         }else{
             jopekToMove = true;
+            jopekTurnOnGoing = true;
         }
         move = false;
         topCardName = data;
@@ -221,7 +227,7 @@ function sendChosenCard(){
     if(jopekToMove){
         let select = document.getElementById("selectCard");
 
-        socket.emit("cardGotSelected", select.value, previousCard, userName, lobbyName);
+        socket.emit("cardGotSelected", select.value, topCardName, previousCard, userName, lobbyName);
     }
 }
 
@@ -233,9 +239,9 @@ function getCardFigure(card){
 
 function changeDemandedCardVisual(figure){
     let stringToChange = demandedCardVisual.textContent;
-    let len = stringToChange.length;
-    let newLabel = setCharAt(stringToChange, len-1, figure);
-    demandedCardVisual.textContent = newLabel;
+    let afterSlice = stringToChange.slice(0,13);
+    afterSlice += figure;
+    demandedCardVisual.textContent = afterSlice;
 }
 
 function getCardColour(card){
@@ -425,6 +431,11 @@ socket.on('change-top-card', (uname, card) => {
 });
 
 socket.on('pull-card', (card) => {
+    if(jopekTurnOnGoing){
+        socket.emit('remove-demanded-card-visual', lobbyName);
+        socket.emit('remove-card-demander', lobbyName);
+        jopekTurnOnGoing = false;
+    }
     let tempHand = hand;
     tempHand.push(card);
     hand = tempHand;
@@ -499,4 +510,9 @@ socket.on('remove-one-card', (uname, index)=>{
 
 socket.on('demandedCard', (cardFigure)=>{
     changeDemandedCardVisual(cardFigure);
+});
+
+socket.on('remove-visual', ()=>{
+    changeDemandedCardVisual("");
+    console.log(`removing visual`);
 });

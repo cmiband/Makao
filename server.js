@@ -1,4 +1,5 @@
 const express = require('express');
+const { copyFileSync } = require('fs');
 const app = express();
 const server = require('http').createServer(app);
 const port = 3000;
@@ -109,12 +110,22 @@ io.on('connection', socket => {
         drawByChoice(socket, lname);
     });
 
-    socket.on('cardGotSelected', (card, prevCard, uname, lname)=>{
-        let figure = getCardFigure(card);
+    socket.on('cardGotSelected', (selectedCard, card, prevCard, uname, lname)=>{
+        let figure = getCardFigure(selectedCard);
         demandACardInLobby(lname, figure);
         registerCardDemander(lname, uname);
         moveCommited(lname, uname, card, prevCard);
         sendDemandedCardInfoToLobby(lname, figure);
+    });
+
+    socket.on('remove-demanded-card-visual', (lname)=>{
+        removeDemandedCardVisualInLobby(lname);
+        console.log("Removing demanded card!");
+    });
+
+    socket.on('remove-card-demander', (lname)=>{
+        deleteCardDemander(lname);
+        resetDemandedCardInLobby(lname);
     });
 });
 
@@ -384,6 +395,10 @@ const sendPossibleCards = (socket, cards, lname, uname) => {
                         possibleCards.push(card);
                         continue;
                     }
+                    if((topCardFigure=='4') && (turnsToWait==0) && currentCardFigure=="dama"){
+                        possibleCards.push(card);
+                        continue;
+                    }
                     if(topCardFigure=="dama"){
                         possibleCards.push(card);
                         continue;
@@ -409,6 +424,10 @@ const sendPossibleCards = (socket, cards, lname, uname) => {
                         continue;
                     }
                     if(isCardGiving(tcard) && ((currentCardColour==topCardColour) || (currentCardFigure==topCardFigure))){
+                        possibleCards.push(card);
+                        continue;
+                    }
+                    if((topCardFigure=="jopek") && (topCardColour==currentCardColour)){
                         possibleCards.push(card);
                         continue;
                     }
@@ -530,6 +549,10 @@ const moveWithoutNewCard = (lname, uname) => {
     }
     io.to(lname).emit('new-move', players[index]);
     setPlayersTurn(lname, players[index]);
+}
+
+const removeDemandedCardVisualInLobby = (lname) =>{
+    io.to(lname).emit('remove-visual');
 }
 
 const sendDemandedCardInfoToLobby = (lname, figure) =>{
