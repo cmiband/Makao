@@ -431,6 +431,10 @@ const sendPossibleCards = (socket, cards, lname, uname) => {
                         possibleCards.push(card);
                         continue;
                     }
+                    if((topCardFigure=="krol")&&(topCardColour==currentCardColour)){
+                        possibleCards.push(card);
+                        continue;
+                    }
                 }
                 else{
                     if(currentCardFigure==demandedCard){
@@ -457,6 +461,12 @@ const sendPossibleCards = (socket, cards, lname, uname) => {
                 }
                 if(tcard=='krolkier'){
                     if(card=='krolpik'){
+                        possibleCards.push(card);
+                        continue;
+                    }
+                }
+                if(tcard=="krolpik"){
+                    if(card=="krolkier"){
                         possibleCards.push(card);
                         continue;
                     }
@@ -504,6 +514,9 @@ const moveCommited = (lname, uname, card, prevCard) => {
             if(card=="krolkier"){
                 amountToPull+=5;
             }
+            if(card=="krolpik"){
+                amountToPull+=5;
+            }
             setCardsToPull(lname, amountToPull);
             console.log(`${lname} has ${amountToPull} cards to pull`);
         }
@@ -512,6 +525,7 @@ const moveCommited = (lname, uname, card, prevCard) => {
             console.log("Turns to wait: "+gamesWithTurnsToWait.get(lname));
         }
     }
+    console.log(`Amount of cards to pull is ${gamesWithAmountOfCardsToPull.get(lname)}`);
 
     let deck = gamesWithDecks.get(lname);
     deck.unshift(prevCard);
@@ -520,11 +534,19 @@ const moveCommited = (lname, uname, card, prevCard) => {
     let players = lobbysWithUsers.get(lname);
     let index = players.indexOf(uname);
 
-    if(index == players.length - 1){
-        index = 0;
-    }
-    else{
-        index += 1; 
+    if(card!="krolpik"){
+        if(index == players.length - 1){
+            index = 0;
+        }
+        else{
+            index += 1; 
+        }
+    }else{
+        if(index==0){
+            index = players.length-1;
+        }else{
+            index -= 1;
+        }
     }
 
     io.to(lname).emit('new-move', players[index]);
@@ -627,7 +649,7 @@ const shuffle = (arr) => {
 const isCardGiving = (card) => {
     let figure = getCardFigure(card);
 
-    if((figure=='2') || (figure=='3') || (figure=='krolkier') || (figure=='krolpik')){
+    if((figure=='2') || (figure=='3') || (card=='krolkier') || (card=='krolpik')){
         return true;
     }
 

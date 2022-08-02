@@ -18,7 +18,6 @@ let playerFourPlace;
 let topCardPlace;
 let topCardName;
 let previousCard;
-let deckCard;
 let demandedCardVisual;
 
 let userName = sessionStorage.getItem('username');
@@ -390,13 +389,6 @@ socket.on('top-card', (card)=>{
     topCard.className = "imgVertical";
     topCardPlace = topCard;
     boardCentre.append(topCard);
-
-    const dCard = document.createElement('img');
-    dCard.id = 'deckTopCard';
-    dCard.src = '/public/graphics/rewers.png';
-    dCard.className = "imgVertical";
-    deckCard = dCard;
-    gameBoard.append(dCard);
 })
 
 socket.on('possible-cards', (cards)=>{
