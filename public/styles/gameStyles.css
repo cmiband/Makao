@@ -72,14 +72,6 @@ img{
     max-width: 100%;
 }
 
-#deckTopCard{
-    max-height: 100%;
-    max-width: 100%;
-    position: absolute;
-    bottom: 10;
-    left: 10;
-}
-
 #drawButton{
     position: absolute;
     right: 0;
@@ -97,6 +89,17 @@ img{
     position: absolute;
     right: 0;
     top: 0;
+}
+
+.colourChoice{
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+#submitColour{
+    width: 100px;
+    margin-top: 35px;
 }
 
 #demandedCardInfo{

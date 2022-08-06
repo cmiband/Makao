@@ -353,6 +353,31 @@ socket.on('load-game-for-lobby', ()=>{
     submit.addEventListener('click', (e)=>sendChosenCard());
     gameBoard.append(submit);
 
+    const labelForColourChoice = document.createElement('label');
+    labelForColourChoice.className = "colourChoice";
+    labelForColourChoice.htmlFor = "colourList";
+    labelForColourChoice.textContent = "Wybierz kolor: ";
+    gameBoard.append(labelForColourChoice);
+
+    const selectColour = document.createElement('select');
+    selectColour.className = "colourChoice";
+    selectColour.id = "selectColour";
+    selectColour.name = "colourList";
+    gameBoard.append(selectColour);
+
+    for(const col of ["pik","kier","karo","trefl"]){
+        const option = document.createElement('option');
+        option.value = col;
+        option.textContent = col;
+        selectColour.append(option);
+    }
+
+    const submitColour = document.createElement('button');
+    submitColour.id = "submitColour";
+    submitColour.className = "colourChoice";
+    submitColour.textContent = "WYBIERZ";
+    gameBoard.append(submitColour);
+
     const demandedCardText = document.createElement('h3');
     demandedCardText.textContent = "Żądana karta:";
     demandedCardText.id = 'demandedCardInfo';
