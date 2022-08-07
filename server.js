@@ -1,5 +1,4 @@
 const express = require('express');
-const { copyFileSync } = require('fs');
 const app = express();
 const server = require('http').createServer(app);
 const port = 3000;
@@ -18,6 +17,7 @@ const gamesWithCardsHistory = new Map();
 const gamesWithTurnsToWait = new Map();
 const gamesWithDemandedCards = new Map();
 const gamesWithCardDemanders = new Map();
+const gamesWithCustomColours = new Map();
 
 let basicDeck = ['2karo','2kier','2trefl','2pik',
                     '3karo', '3kier', '3trefl', '3pik',
@@ -127,6 +127,12 @@ io.on('connection', socket => {
         deleteCardDemander(lname);
         resetDemandedCardInLobby(lname);
     });
+
+    socket.on('colourGotSelected', (selectedColour, card, prevCard, uname, lname)=>{
+        selectColourInLobby(lname, selectedColour);
+        moveCommited(lname, uname, card, prevCard);
+        sendSelectedColourInfoToLobby(lname, selectedColour);
+    });
 });
 
 const setUpLobby = (socket, uname) => {
@@ -228,6 +234,14 @@ const registerCardDemander = (lname, uname) => {
 
 const deleteCardDemander = (lname) => {
     gamesWithCardDemanders.delete(lname);
+}
+
+const selectColourInLobby = (lname, colour) =>{
+    gamesWithCustomColours.set(lname, colour);
+}
+
+const setBasicSelectedColour = (lname) => {
+    gamesWithCustomColours.set(lname, "basic");
 }
 
 const onDisconnect = (socket) => {
@@ -361,6 +375,7 @@ const sendFirstMoveRequest = (lname, uname) => {
     setCardsToPull(lname, 0);
     initiateBlockTurns(lname);
     initiateDemandedCards(lname);
+    setBasicSelectedColour(lname);
 }
 
 const sendPossibleCards = (socket, cards, lname, uname) => {
@@ -374,6 +389,11 @@ const sendPossibleCards = (socket, cards, lname, uname) => {
     let turnsToWait = gamesWithTurnsToWait.get(lname);
     let demandedCard = gamesWithDemandedCards.get(lname);
     let cardDemander = gamesWithCardDemanders.get(lname);
+    let customColour = gamesWithCustomColours.get(lname);
+
+    if(customColour != "basic"){
+        topCardColour = customColour;
+    }
 
     for(const card of cards){
         let currentCardColour = getCardColour(card);
@@ -432,6 +452,10 @@ const sendPossibleCards = (socket, cards, lname, uname) => {
                         continue;
                     }
                     if((topCardFigure=="krol")&&(topCardColour==currentCardColour)){
+                        possibleCards.push(card);
+                        continue;
+                    }
+                    if((topCardFigure=="as") && (currentCardColour==topCardColour)){
                         possibleCards.push(card);
                         continue;
                     }
@@ -501,6 +525,7 @@ const moveCommited = (lname, uname, card, prevCard) => {
     addCardToHistory(lname, card);
     console.log(lname+ " : " +card);
     let cardFigure = getCardFigure(card);
+    let selectedColour = gamesWithCustomColours.get(lname);
 
     if(isSpecialCard(card)){
         if(isCardGiving(card)){
@@ -524,6 +549,10 @@ const moveCommited = (lname, uname, card, prevCard) => {
             addTurnToWait(lname);
             console.log("Turns to wait: "+gamesWithTurnsToWait.get(lname));
         }
+    }
+    if(cardFigure != "as" && selectedColour != "basic"){
+        setBasicSelectedColour(lname);
+        removeSelectedColourInfoInLobby(lname);
     }
     console.log(`Amount of cards to pull is ${gamesWithAmountOfCardsToPull.get(lname)}`);
 
@@ -579,6 +608,14 @@ const removeDemandedCardVisualInLobby = (lname) =>{
 
 const sendDemandedCardInfoToLobby = (lname, figure) =>{
     io.to(lname).emit('demandedCard', figure);
+}
+
+const sendSelectedColourInfoToLobby = (lname, colour) =>{
+    io.to(lname).emit('selectedColourInfo', colour);
+}
+
+const removeSelectedColourInfoInLobby = (lname) => {
+    io.to(lname).emit('remove-colour');
 }
 
 const drawByChoice = (socket, lname) => {

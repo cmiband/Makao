@@ -19,6 +19,7 @@ let topCardPlace;
 let topCardName;
 let previousCard;
 let demandedCardVisual;
+let chosenColourVisual;
 
 let userName = sessionStorage.getItem('username');
 let lobbyName = sessionStorage.getItem('lobbyname');
@@ -35,6 +36,7 @@ let blocked = false;
 let turnsToWait = 0;
 let jopekToMove = false;
 let jopekTurnOnGoing = false;
+let asToMove = false;
 
 sessionStorage.clear();
 
@@ -231,12 +233,17 @@ function drop(ev) {
         const oldCardToRemove = document.getElementById(data);
         oldCardToRemove.remove();
 
-        if(cardFigure != "jopek"){
+        if(cardFigure != "jopek" && cardFigure != "as"){
             socket.emit('new-card-on-top', lobbyName, userName, data, topCardName);
         }
         else{
-            jopekToMove = true;
-            jopekTurnOnGoing = true;
+            if(cardFigure == "jopek"){
+                jopekToMove = true;
+                jopekTurnOnGoing = true;
+            }
+            else if(cardFigure == "as"){
+                asToMove = true;
+            }
         }
         move = false;
         topCardName = data;
@@ -257,6 +264,16 @@ function sendChosenCard(){
         let select = document.getElementById("selectCard");
 
         socket.emit("cardGotSelected", select.value, topCardName, previousCard, userName, lobbyName);
+        jopekToMove = false;
+    }
+}
+
+function sendChosenColour(){
+    if(asToMove){
+        let select = document.getElementById("selectColour");
+
+        socket.emit("colourGotSelected", select.value, topCardName, previousCard, userName, lobbyName);
+        asToMove = false;
     }
 }
 
@@ -271,6 +288,13 @@ function changeDemandedCardVisual(figure){
     let afterSlice = stringToChange.slice(0,13);
     afterSlice += figure;
     demandedCardVisual.textContent = afterSlice;
+}
+
+function changeColourVisual(colour){
+    let stringToChange = chosenColourVisual.textContent;
+    let afterSlice = stringToChange.slice(0,6);
+    afterSlice += colour;
+    chosenColourVisual.textContent = afterSlice;
 }
 
 function getCardColour(card){
@@ -330,6 +354,7 @@ socket.on('load-game-for-lobby', ()=>{
     const labelForDemandedCard = document.createElement('label');
     labelForDemandedCard.className = "demandedCard";
     labelForDemandedCard.htmlFor = "demandedCards";
+    labelForDemandedCard.id = "labelDemandedCard";
     labelForDemandedCard.textContent = "Wybierz kartę: ";
     gameBoard.append(labelForDemandedCard);
 
@@ -356,6 +381,7 @@ socket.on('load-game-for-lobby', ()=>{
     const labelForColourChoice = document.createElement('label');
     labelForColourChoice.className = "colourChoice";
     labelForColourChoice.htmlFor = "colourList";
+    labelForColourChoice.id = "labelColour";
     labelForColourChoice.textContent = "Wybierz kolor: ";
     gameBoard.append(labelForColourChoice);
 
@@ -376,6 +402,7 @@ socket.on('load-game-for-lobby', ()=>{
     submitColour.id = "submitColour";
     submitColour.className = "colourChoice";
     submitColour.textContent = "WYBIERZ";
+    submitColour.addEventListener('click', (e)=>sendChosenColour());
     gameBoard.append(submitColour);
 
     const demandedCardText = document.createElement('h3');
@@ -383,6 +410,12 @@ socket.on('load-game-for-lobby', ()=>{
     demandedCardText.id = 'demandedCardInfo';
     gameBoard.append(demandedCardText);
     demandedCardVisual = demandedCardText;
+
+    const colourChoiceText = document.createElement('h3');
+    colourChoiceText.textContent = "Kolor:";
+    colourChoiceText.id = "colourChoiceInfo";
+    gameBoard.append(colourChoiceText);
+    chosenColourVisual = colourChoiceText;
 
     socket.emit('request-deck', lobbyName);
 });
@@ -509,4 +542,12 @@ socket.on('demandedCard', (cardFigure)=>{
 socket.on('remove-visual', ()=>{
     changeDemandedCardVisual("");
     console.log(`removing visual`);
+});
+
+socket.on("selectedColourInfo", (colour)=>{
+    changeColourVisual(colour);
+});
+
+socket.on("remove-colour", ()=>{
+    changeColourVisual("");
 });

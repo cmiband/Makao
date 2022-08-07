@@ -16,6 +16,7 @@ let topCardPlace;
 let topCardName;
 let previousCard;
 let demandedCardVisual;
+let chosenColourVisual;
 
 let userName = sessionStorage.getItem('joiningname');
 let partyOwnerName;
@@ -33,6 +34,7 @@ let blocked = false;
 let turnsToWait = 0;
 let jopekToMove = false;
 let jopekTurnOnGoing = false;
+let asToMove = false;
 
 sessionStorage.clear();
 
@@ -202,11 +204,16 @@ function drop(ev) {
         const oldCardToRemove = document.getElementById(data);
         oldCardToRemove.remove();
 
-        if(newCardFigure != "jopek"){
+        if(newCardFigure != "jopek" && newCardFigure != "as"){
             socket.emit('new-card-on-top', lobbyName, userName, data, topCardName);
         }else{
-            jopekToMove = true;
-            jopekTurnOnGoing = true;
+            if(newCardFigure == "jopek"){
+                jopekToMove = true;
+                jopekTurnOnGoing = true;
+            }
+            else if(newCardFigure == "as"){
+                asToMove = true;
+            }
         }
         move = false;
         topCardName = data;
@@ -227,7 +234,24 @@ function sendChosenCard(){
         let select = document.getElementById("selectCard");
 
         socket.emit("cardGotSelected", select.value, topCardName, previousCard, userName, lobbyName);
+        jopekToMove = false;
     }
+}
+
+function sendChosenColour(){
+    if(asToMove){
+        let select = document.getElementById("selectColour");
+
+        socket.emit("colourGotSelected", select.value, topCardName, previousCard, userName, lobbyName);
+        asToMove = false;
+    }
+}
+
+function changeColourVisual(colour){
+    let stringToChange = chosenColourVisual.textContent;
+    let afterSlice = stringToChange.slice(0,6);
+    afterSlice += colour;
+    chosenColourVisual.textContent = afterSlice;
 }
 
 function getCardFigure(card){
@@ -314,6 +338,7 @@ socket.on('load-game-for-lobby', ()=>{
     const labelForDemandedCard = document.createElement('label');
     labelForDemandedCard.className = "demandedCard";
     labelForDemandedCard.htmlFor = "demandedCards";
+    labelForDemandedCard.id = "labelDemandedCard";
     labelForDemandedCard.textContent = "Wybierz kartę: ";
     gameBoard.append(labelForDemandedCard);
 
@@ -337,11 +362,44 @@ socket.on('load-game-for-lobby', ()=>{
     submit.addEventListener('click', (e)=>sendChosenCard());
     gameBoard.append(submit);
 
+    const labelForColourChoice = document.createElement('label');
+    labelForColourChoice.className = "colourChoice";
+    labelForColourChoice.htmlFor = "colourList";
+    labelForColourChoice.id = "labelColour";
+    labelForColourChoice.textContent = "Wybierz kolor: ";
+    gameBoard.append(labelForColourChoice);
+
+    const selectColour = document.createElement('select');
+    selectColour.className = "colourChoice";
+    selectColour.id = "selectColour";
+    selectColour.name = "colourList";
+    gameBoard.append(selectColour);
+
+    for(const col of ["pik","kier","karo","trefl"]){
+        const option = document.createElement('option');
+        option.value = col;
+        option.textContent = col;
+        selectColour.append(option);
+    }
+
+    const submitColour = document.createElement('button');
+    submitColour.id = "submitColour";
+    submitColour.className = "colourChoice";
+    submitColour.textContent = "WYBIERZ";
+    submitColour.addEventListener('click', (e)=>sendChosenColour());
+    gameBoard.append(submitColour);
+
     const demandedCardText = document.createElement('h3');
     demandedCardText.textContent = "Żądana karta:  ";
     demandedCardText.id = 'demandedCardInfo';
     gameBoard.append(demandedCardText);
     demandedCardVisual = demandedCardText;
+
+    const colourChoiceText = document.createElement('h3');
+    colourChoiceText.textContent = "Kolor:";
+    colourChoiceText.id = "colourChoiceInfo";
+    gameBoard.append(colourChoiceText);
+    chosenColourVisual = colourChoiceText;
 });
 
 socket.on('deck-sent', (deckSent)=>{
@@ -507,4 +565,12 @@ socket.on('demandedCard', (cardFigure)=>{
 socket.on('remove-visual', ()=>{
     changeDemandedCardVisual("");
     console.log(`removing visual`);
+});
+
+socket.on("selectedColourInfo", (colour)=>{
+    changeColourVisual(colour);
+});
+
+socket.on("remove-colour", ()=>{
+    changeColourVisual("");
 });

@@ -91,6 +91,10 @@ img{
     top: 0;
 }
 
+#labelDemandedCard{
+    margin-right: 50px;
+}
+
 .colourChoice{
     position: absolute;
     left: 0;
@@ -102,8 +106,19 @@ img{
     margin-top: 35px;
 }
 
+#selectColour{
+    margin-left: 115px;
+}
+
 #demandedCardInfo{
     position: absolute;
     left: 0;
     bottom: 0;
+}
+
+#colourChoiceInfo{
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    margin-bottom: 50px;
 }
