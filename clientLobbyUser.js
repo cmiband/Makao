@@ -160,10 +160,10 @@ function addHorizontalCard(card, playerId){
     img.className = "imgHorizontal";
 
     if(playerId == 2){
-        playerOnePlace.append(img);
+        playerTwoPlace.append(img);
     }
     if(playerId == 4){
-        playerThreePlace.append(img);
+        playerFourPlace.append(img);
     }
 }
 
@@ -573,4 +573,58 @@ socket.on("selectedColourInfo", (colour)=>{
 
 socket.on("remove-colour", ()=>{
     changeColourVisual("");
+});
+
+socket.on('addCards', (cards, uname)=>{
+    if(uname != userName){
+        let indexOfUser = users.indexOf(userName);
+        let index = users.indexOf(uname);
+        let lobbySize = users.length;
+        if(index == 0){
+            for(let i = 0; i<cards.length; i++){
+                addHorizontalCard("rewers",2);
+            }
+        }else{
+            if(lobbySize==3){
+                for(let i = 0; i<cards.length; i++){
+                    addVerticalCard("rewers",3);
+                }
+            }else{
+                if(indexOfUser==1){
+                    if(index==2){
+                        for(let i = 0; i<cards.length; i++){
+                            addVerticalCard("rewers",3);
+                        }
+                    }
+                    else if(index==3){
+                        for(let i = 0; i<cards.length; i++){
+                            addHorizontalCard("rewers",4);
+                        }
+                    }
+                }
+                else if(indexOfUser==2){
+                    if(index==1){
+                        for(let i = 0; i<cards.length; i++){
+                            addVerticalCard("rewers",3);
+                        }
+                    }
+                    else if(index==3){
+                        for(let i = 0; i<cards.length; i++){
+                            addHorizontalCard("rewers",4);
+                        }
+                    }
+                }else{
+                    if(index==1){
+                        for(let i = 0; i<cards.length; i++){
+                            addVerticalCard("rewers",3);
+                        }
+                    }else if(index==2){
+                        for(let i = 0; i<cards.length; i++){
+                            addHorizontalCard("rewers",4);
+                        }
+                    }
+                }
+            }
+        }
+    }
 });

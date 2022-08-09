@@ -185,10 +185,10 @@ function addHorizontalCard(card, playerId){
     img.className = "imgHorizontal";
 
     if(playerId == 2){
-        playerOnePlace.append(img);
+        playerTwoPlace.append(img);
     }
     if(playerId == 4){
-        playerThreePlace.append(img);
+        playerFourPlace.append(img);
     }
 }
 
@@ -550,4 +550,29 @@ socket.on("selectedColourInfo", (colour)=>{
 
 socket.on("remove-colour", ()=>{
     changeColourVisual("");
+});
+
+socket.on('addCards', (cards,uname)=>{
+    if(uname != userName){
+        let index = users.indexOf(uname);
+        switch(index){
+            case 1:
+                for(let i = 0; i<cards.length; i++){
+                    addHorizontalCard("rewers",2);
+                }
+                break;
+            
+            case 2:
+                for(let i = 0; i<cards.length; i++){
+                    addVerticalCard("rewers",3);
+                }
+                break;   
+
+            case 4:
+                for(let i = 0; i<cards.length; i++){
+                    addHorizontalCard("rewers",4);
+                }
+                break;
+        }
+    }
 });

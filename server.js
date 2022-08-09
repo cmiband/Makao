@@ -502,10 +502,12 @@ const sendPossibleCards = (socket, cards, lname, uname) => {
     if(possibleCards.length == 0 && amountOfCardsToPull == 0 && turnsToWait == 0){
         let cardToPull = pullOneCardAndChangeDeck(deck, lname);
         socket.emit('pull-card', cardToPull);
+        io.to(lname).emit('addCards', [cardToPull], uname);
     }else if(possibleCards.length == 0 && amountOfCardsToPull > 0 && turnsToWait == 0){
         let cardsToPull = takeCardsToPull(lname, amountOfCardsToPull);
         socket.emit('special-pull', cardsToPull);
         setCardsToPull(lname, 0);
+        io.to(lname).emit('addCards', cardsToPull, uname);
     }else if(possibleCards.length == 0 && amountOfCardsToPull == 0 && turnsToWait>0){
         socket.emit("im-blocked", turnsToWait);
         resetTurnsToWaitInLobby(lname);
