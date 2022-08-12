@@ -133,6 +133,14 @@ io.on('connection', socket => {
         moveCommited(lname, uname, card, prevCard);
         sendSelectedColourInfoToLobby(lname, selectedColour);
     });
+
+    socket.on("player-won", (lname, uname)=>{
+        playerWonCloseLobby(lname, uname);
+    })
+
+    socket.on('delete-lobby', (lname)=>{
+        removeLobby(lname);
+    });
 });
 
 const setUpLobby = (socket, uname) => {
@@ -173,6 +181,20 @@ const addUserToSpecificLobby = (lname, uname) => {
 
 const addDeckToGame = (lname, deck) => {
     gamesWithDecks.set(lname, deck);
+}
+
+const removeLobby = (lname) => {
+    availableLobbys.delete(lname);
+    lobbysWithUsers.delete(lname);
+    gamesWithDecks.delete(lname);
+    gamesWithTopCard.delete(lname);
+    gamesWithPlayersTurn.delete(lname);
+    gamesWithAmountOfCardsToPull.delete(lname);
+    gamesWithCardsHistory.delete(lname);
+    gamesWithTurnsToWait.delete(lname);
+    gamesWithDemandedCards.delete(lname);
+    gamesWithCardDemanders.delete(lname);
+    gamesWithCustomColours.delete(lname);
 }
 
 const changeDeckOfTheGame = (lname, deck) => {
@@ -603,6 +625,10 @@ const moveWithoutNewCard = (lname, uname) => {
     io.to(lname).emit('new-move', players[index]);
     setPlayersTurn(lname, players[index]);
 }
+
+const playerWonCloseLobby = (lname, uname) => {
+    io.to(lname).emit('close-lobby', uname);
+};
 
 const removeDemandedCardVisualInLobby = (lname) =>{
     io.to(lname).emit('remove-visual');

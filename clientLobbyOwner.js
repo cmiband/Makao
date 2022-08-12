@@ -250,6 +250,9 @@ function drop(ev) {
 
         let removalIndex = hand.indexOf(data);
         hand.splice(removalIndex, 1);
+        if(hand.length == 0){
+            socket.emit('player-won', lobbyName, userName);
+        }
     }
 }
 
@@ -575,4 +578,11 @@ socket.on('addCards', (cards,uname)=>{
                 break;
         }
     }
+});
+
+socket.on('close-lobby', (uname)=>{
+    alert(`${uname} wygrał!`);
+
+    socket.emit('delete-lobby', lobbyName);
+    leaveLobby();
 });
